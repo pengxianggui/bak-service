@@ -3,7 +3,7 @@
     <fast-table :option="tableOption">
       <fast-table-column prop="id" label="ID"/>
       <fast-table-column prop="categoryId" label="数据品类ID" width="120px"/>
-      <fast-table-column-object prop="categoryName" label="数据品类名"
+      <fast-table-column-object prop="categoryName" label="数据品类名" required
                                 :table-option="categoryOption" show-field="name" :pick-map="{id: 'categoryId', name: 'categoryName'}"/>
       <fast-table-column-select prop="type" label="类型" required
                                 :options="[{ label: '备份', value: 'bak'}, { label: '归档', value: 'archive'}]"

@@ -24,7 +24,7 @@ public class TaskConfig {
     private Long categoryId;
 
     @ApiModelProperty("数据品类名")
-    private Long categoryName;
+    private String categoryName;
 
     @ApiModelProperty("任务类型(bak-备份;archive-归档)")
     private String type;
