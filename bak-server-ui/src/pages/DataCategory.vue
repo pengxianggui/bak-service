@@ -24,6 +24,7 @@ export default {
         module: 'dataCategory',
         sortField: 'createTime',
         style: {
+          size: 'mini',
           flexHeight: true
         }
       })

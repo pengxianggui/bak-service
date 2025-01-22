@@ -11,8 +11,12 @@
       <fast-table-column-input prop="cron" label="执行频率(Cron)" width="160" required/>
       <fast-table-column-input prop="cond" label="数据过滤条件(where)" width="180"/>
       <fast-table-column-switch prop="zip" label="是否压缩"/>
-      <fast-table-column-switch prop="enable" label="是否启用"/>
-      <fast-table-column-select prop="strategy" label="策略" required
+      <fast-table-column-switch prop="enable" label="是否启用">
+        <template #normal="{row}">
+          <el-switch v-model="row.row.enable" @change="switchEnable(row.row)"></el-switch>
+        </template>
+      </fast-table-column-switch>
+      <fast-table-column-select prop="strategy" label="策略" required width="120px"
                                 :options="[{ label: '保留最近指定天数', value: 'd'}, { label: '保留指定条数', value: 'r'}]"
                                 :editable="({editRow}) => editRow.type === 'archive'"/>
       <fast-table-column-number prop="strategyValue" label="策略值" required
@@ -37,6 +41,7 @@ export default {
         context: this,
         module: 'taskConfig',
         style: {
+          size: 'mini',
           flexHeight: true
         }
       }),
@@ -55,10 +60,21 @@ export default {
   },
   methods: {
     handleTypeChange(val, {editRow}) {
-      if (val === 'bak') {
+      if (val === 'bak') { // 重新置空策略值，避免脏数据
         editRow.strategy = null;
         editRow.strategyValue = null;
       }
+    },
+    switchEnable(row) {
+      const {id, enable} = row;
+      const url = `/taskConfig/${enable ? 'enable' : 'disable'}/${id}`
+      this.$http.post(url).then(({data}) => {
+        if (data === true) {
+          this.$message.success('操作成功')
+        } else {
+          this.$message.error('操作失败')
+        }
+      })
     },
     inputRun() {
       // TODO 输入执行

@@ -8,6 +8,7 @@ import "fast-crud-ui/lib/style.css"
 import http from './http'
 
 Vue.config.productionTip = false
+Vue.prototype.$http = http
 Vue.use(VueRouter)
 const routes = [
     {

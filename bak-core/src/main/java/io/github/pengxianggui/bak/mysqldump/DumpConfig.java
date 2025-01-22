@@ -2,6 +2,7 @@ package io.github.pengxianggui.bak.mysqldump;
 
 import io.github.pengxianggui.bak.util.FileUtil;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -22,32 +23,47 @@ public class DumpConfig {
 
     // 数据库ip
     @Getter
+    @Setter
     private String dbIp;
     // 数据库端口
     @Getter
+    @Setter
     private int dbPort;
     // 数据库用户名
     @Getter
-    private String dbUseruame;
+    @Setter
+    private String dbUsername;
     // 数据库密码
     @Getter
+    @Setter
     private String dbPassword;
     // 默认导出文件输出目录
     @Getter
-    private String defaultExportDir;
+    @Setter
+    private String exportDir;
     // 默认备份文件输出目录
     @Getter
-    private String defaultBakDir;
+    @Setter
+    private String bakDir;
     // 默认归档文件输出目录
     @Getter
-    private String defaultArchiveDir;
+    @Setter
+    private String archiveDir;
     // 阈值检测脚本路径
+    @Getter
+    @Setter
     private String thresholdScriptPath = "classpath:shell/over_threshold.sh";
     // 备份脚本路径
+    @Getter
+    @Setter
     private String bakScriptPath = "classpath:shell/run_bak.sh";
     // 归档脚本路径
+    @Getter
+    @Setter
     private String archiveScriptPath = "classpath:shell/run_archive.sh";
     // 还原脚本路径
+    @Getter
+    @Setter
     private String restoreScriptPath = "classpath:shell/run_restore.sh";
     private File thresholdScript;
     private File bakScript;
@@ -131,8 +147,8 @@ public class DumpConfig {
         return this;
     }
 
-    public DumpConfig dbUseruame(String dbUsername) {
-        this.dbUseruame = dbUsername;
+    public DumpConfig dbUsername(String dbUsername) {
+        this.dbUsername = dbUsername;
         return this;
     }
 
@@ -141,18 +157,18 @@ public class DumpConfig {
         return this;
     }
 
-    public DumpConfig defaultBakDir(String defaultBakDir) {
-        this.defaultBakDir = defaultBakDir;
+    public DumpConfig bakDir(String defaultBakDir) {
+        this.bakDir = defaultBakDir;
         return this;
     }
 
-    public DumpConfig defaultArchiveDir(String defaultArchiveDir) {
-        this.defaultArchiveDir = defaultArchiveDir;
+    public DumpConfig archiveDir(String defaultArchiveDir) {
+        this.archiveDir = defaultArchiveDir;
         return this;
     }
 
-    public DumpConfig defaultExportDir(String defaultExportDir) {
-        this.defaultExportDir = defaultExportDir;
+    public DumpConfig exportDir(String defaultExportDir) {
+        this.exportDir = defaultExportDir;
         return this;
     }
 

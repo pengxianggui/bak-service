@@ -34,6 +34,7 @@ export default {
         updatable: false,
         deletable: false,
         style: {
+          size: 'mini',
           flexHeight: true
         }
       })
