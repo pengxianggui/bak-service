@@ -50,7 +50,7 @@ export default {
       }).then((data) => {
         const {type, ...formData} = data
         this.$http.post(`/task/${type}`, formData).then(({code, data: url, msg}) => {
-          if(code === 0) {
+          if (code === 0) {
             this.handleFileUrl(url);
           } else {
             this.$message.error(msg || "执行失败")
@@ -76,13 +76,18 @@ export default {
               h('fast-table-column', {props: {prop: 'categoryName', label: '数据品类名称', width: '160'}}),
               // h('fast-table-column', {props: {prop: 'dbName', label: '数据库名'}}),
               // h('fast-table-column', {props: {prop: 'tableName', label: '表名'}}),
-              // h('fast-table-column-select', {
-              //   props: {
-              //     prop: 'type',
-              //     label: '类型',
-              //     options: "[{ label: '备份', value: 'bak'}, { label: '归档', value: 'archive'}, { label: '还原', value: 'restore'}, { label: '导出', value: 'export'}]"
-              //   }
-              // }),
+              h('fast-table-column-select', {
+                props: {
+                  prop: 'type',
+                  label: '类型',
+                  options: [
+                    {label: '备份', value: 'bak'},
+                    {label: '归档', value: 'archive'},
+                    {label: '还原', value: 'restore'},
+                    {label: '导出', value: 'export'}
+                  ]
+                }
+              }),
               h('fast-table-column-switch', {props: {prop: 'success', label: '是否执行成功'}}),
               h('fast-table-column-file', {props: {prop: 'fileUrl', label: '文件'}}),
               h('fast-table-column-switch', {props: {prop: 'expired', label: '是否失效'}}),
