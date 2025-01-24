@@ -13,19 +13,19 @@ public class BakException extends RuntimeException {
     private OprType oprType;
 
     public static BakException bakEx(String messageTmpl, Object... args) {
-        return new BakException(format(messageTmpl, args)).oprType(OprType.bak);
+        return new BakException(messageTmpl, args).oprType(OprType.bak);
     }
 
     public static BakException restoreEx(String messageTmpl, Object... args) {
-        return new BakException(format(messageTmpl, args)).oprType(OprType.restore);
+        return new BakException(messageTmpl, args).oprType(OprType.restore);
     }
 
     public static BakException archiveEx(String messageTmpl, Object... args) {
-        return new BakException(format(messageTmpl, args)).oprType(OprType.archive);
+        return new BakException(messageTmpl, args).oprType(OprType.archive);
     }
 
     public static BakException exportEx(String messageTmpl, Object... args) {
-        return new BakException(format(messageTmpl, args)).oprType(OprType.export);
+        return new BakException(messageTmpl, args).oprType(OprType.export);
     }
 
     public BakException(String messageTmpl, Object... args) {

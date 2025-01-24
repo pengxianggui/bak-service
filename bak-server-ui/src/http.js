@@ -1,7 +1,8 @@
 import axios from "axios";
+import {Message} from 'element-ui'
 
 const http = axios.create({
-    baseURL: '/api'
+    baseURL: process.env.VUE_APP_MODE === 'toBackend' ? '' : '/api',
 });
 
 http.interceptors.request.use(
@@ -14,10 +15,10 @@ http.interceptors.request.use(
 )
 http.interceptors.response.use(
     (response) => {
-        // 如果后端有自定义响应体, 则返回内层的业务数据
         return response.data;
     },
     (error) => {
+        Message.error(error.message);
         return Promise.reject(error)
     }
 )

@@ -3,8 +3,9 @@
     <fast-table :option="tableOption">
       <fast-table-column prop="id" label="ID"/>
       <fast-table-column prop="categoryId" label="数据品类ID" width="120px"/>
-      <fast-table-column-object prop="categoryName" label="数据品类名" required
-                                :table-option="categoryOption" show-field="name" :pick-map="{id: 'categoryId', name: 'categoryName'}"/>
+      <fast-table-column-object prop="categoryName" label="数据品类名" required first-filter
+                                :table-option="categoryOption" show-field="name"
+                                :pick-map="{id: 'categoryId', name: 'categoryName'}"/>
       <fast-table-column-select prop="type" label="类型" required
                                 :options="[{ label: '备份', value: 'bak'}, { label: '归档', value: 'archive'}]"
                                 @change="handleTypeChange"/>
@@ -23,6 +24,11 @@
                                 :editable="({editRow}) => editRow.type === 'archive'"/>
       <fast-table-column-number prop="keepFate" label="文件保存天数" width="130"/>
       <fast-table-column-date-picker prop="createTime" label="创建时间" :editable="false"/>
+      <el-table-column label="操作" width="90px" fixed="right">
+        <template slot-scope="scope">
+          <el-button type="text" size="small" icon="el-icon-video-play" @click="runOnce(scope)">运行一次</el-button>
+        </template>
+      </el-table-column>
       <template #button="scope">
         <el-button :size="scope.size" type="primary" plain @click="inputRun">输入执行</el-button>
       </template>
@@ -31,7 +37,8 @@
 </template>
 
 <script>
-import {FastTableOption} from 'fast-crud-ui'
+import {FastTableOption, util} from 'fast-crud-ui'
+import BakArchiveParamForm from "../components/BakArchiveParamForm.vue";
 
 export default {
   name: "TaskConfig",
@@ -77,7 +84,41 @@ export default {
       })
     },
     inputRun() {
-      // TODO 输入执行
+      util.openDialog({
+        component: BakArchiveParamForm, dialogProps: {
+          title: '手动输入参数执行备份/归档',
+          width: '50%',
+          size: 'small'
+        }
+      }).then((data) => {
+        const {type, ...formData} = data
+        this.$http.post(`/task/${type}`, formData).then(({data: url}) => {
+          this.handleFileUrl(url);
+        })
+      })
+    },
+    runOnce(scope) {
+      const {row: {row}} = scope
+      this.$confirm('确定要运行一次吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消'
+      }).then(() => {
+        this.$http.post(`/task/run/${row.id}`).then(({code, data: url, msg}) => {
+          if(code === 0) {
+            this.handleFileUrl(url);
+          } else {
+            this.$message.error(msg || "执行失败")
+          }
+        })
+      })
+    },
+    handleFileUrl(url) {
+      const baseURL = this.$http.defaults.baseURL
+      this.$notify({
+        title: '执行成功!',
+        dangerouslyUseHTMLString: true,
+        message: `<div><a href="${baseURL + url}">点击下载</a>, 你也可以稍后去【操作记录】中找到此次执行记录进行下载</div>`
+      });
     }
   }
 }

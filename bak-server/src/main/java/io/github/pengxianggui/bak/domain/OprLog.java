@@ -44,11 +44,14 @@ public class OprLog {
     @ApiModelProperty("生成的文件路径")
     private String filePath;
 
+    @ApiModelProperty("(文件)获取地址")
+    private String fileUrl;
+
     @ApiModelProperty("(文件)失效日期")
     private LocalDate expiredDate;
 
-    @ApiModelProperty("(文件)失效日期")
-    private LocalDateTime expired;
+    @ApiModelProperty("(文件)已经失效")
+    private Boolean expired;
 
     @ApiModelProperty("where条件")
     private String cond;

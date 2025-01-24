@@ -3,6 +3,8 @@ package io.github.pengxianggui.bak.controller.dto;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
+
 /**
  * 输入参数，手动执行备份/导出
  *
@@ -11,7 +13,7 @@ import lombok.Data;
  */
 @Data
 public class BakParam {
-    @ApiModelProperty(value = "数据品类编码(给了这个值，就可以不给数据库名和表名了)")
+    @ApiModelProperty(value = "数据品类编码(给了这个值，也可以不给数据库名和表名了)")
     private String categoryCode;
     @ApiModelProperty(value = "数据库名")
     private String dbName;

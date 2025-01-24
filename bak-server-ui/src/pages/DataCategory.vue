@@ -3,7 +3,7 @@
     <fast-table :option="tableOption">
       <fast-table-column prop="id" label="ID"/>
       <fast-table-column-input prop="code" label="编码" required/>
-      <fast-table-column-input prop="name" label="名称" required/>
+      <fast-table-column-input prop="name" label="名称" required first-filter />
       <fast-table-column-input prop="dbName" label="数据库名" required/>
       <fast-table-column-input prop="tableName" label="表名" required/>
       <fast-table-column-input prop="timeFieldName" label="时间字段"/>

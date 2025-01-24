@@ -24,6 +24,8 @@ public class OprLogServiceImpl extends BaseServiceImpl<OprLog, OprLogMapper> imp
 
     @Override
     public String getPreviewUrl(File file) {
-        return "/backLog/download?path=" + URLEncoder.encode(file.getAbsolutePath());
+        return "/oprLog/download?path=" + URLEncoder.encode(file.getAbsolutePath());
     }
+
+
 }

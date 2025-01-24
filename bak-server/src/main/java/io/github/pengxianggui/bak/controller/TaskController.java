@@ -4,7 +4,6 @@ import io.github.pengxianggui.bak.controller.dto.ArchiveParam;
 import io.github.pengxianggui.bak.controller.dto.BakParam;
 import io.github.pengxianggui.bak.controller.vo.Result;
 import io.github.pengxianggui.bak.enums.FileSuffix;
-import io.github.pengxianggui.bak.service.OprLogService;
 import io.github.pengxianggui.bak.service.TaskService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,16 +33,14 @@ import java.io.IOException;
 public class TaskController {
     @Resource
     private TaskService taskService;
-    @Resource
-    private OprLogService oprLogService;
 
     @ApiOperation(value = "基于任务配置执行一次备份/归档", notes = "并返回生成的文件路径, 前端可调用【备份记录】>【备份/归档文件下载】接口进行下载")
     @PostMapping("run/{id}")
     public Result<String> run(@ApiParam("任务配置id") @PathVariable("id") Long taskConfigId) {
         try {
-            File file = taskService.run(taskConfigId);
-            return Result.success(oprLogService.getPreviewUrl(file), "任务执行成功, 文件已经生成");
-        } catch (IOException e) {
+            String fileUrl = taskService.run(taskConfigId);
+            return Result.success(fileUrl, "任务执行成功, 文件已经生成");
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
             return Result.fail(500, e.getMessage());
         }
@@ -54,9 +51,9 @@ public class TaskController {
     @PostMapping("bak")
     public Result<String> bak(@Valid @RequestBody BakParam param) {
         try {
-            File file = taskService.bak(param);
-            return Result.success(oprLogService.getPreviewUrl(file), "手动执行成功, 文件已经生成");
-        } catch (IOException e) {
+            String fileUrl = taskService.bak(param);
+            return Result.success(fileUrl, "手动执行成功, 文件已经生成");
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
             return Result.fail(500, e.getMessage());
         }
@@ -66,9 +63,9 @@ public class TaskController {
     @PostMapping("archive")
     public Result<String> archive(@Valid @RequestBody ArchiveParam param) {
         try {
-            File file = taskService.archive(param);
-            return Result.success(file.getAbsolutePath(), "手动执行成功, 文件已经生成");
-        } catch (IOException e) {
+            String fileUrl = taskService.archive(param);
+            return Result.success(fileUrl, "手动执行成功, 文件已经生成");
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
             return Result.fail(500, "执行失败", e.getMessage());
         }
@@ -80,7 +77,7 @@ public class TaskController {
         try {
             taskService.restore(backLogId);
             return Result.success(true, "还原成功, 请检查数据!");
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
             return Result.fail(500, e.getMessage());
         }
