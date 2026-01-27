@@ -1,12 +1,9 @@
 <template>
   <div class="task-config">
     <fast-table :option="tableOption">
-      <!--      <template #button="scope">-->
-      <!--        <el-button :size="scope.size" type="primary" plain @click="inputRun">输入执行</el-button>-->
-      <!--      </template>-->
       <fast-table-column prop="id" label="ID" width="60"/>
-      <fast-table-column prop="categoryId" label="数据类目ID" width="120" hidden/>
-      <fast-table-column-object prop="categoryName" label="数据类目名" required width="160" :filter="0"
+      <fast-table-column prop="categoryId" label="数据品类ID" width="120" hidden/>
+      <fast-table-column-object prop="categoryName" label="数据品类名" required :filter="0"
                                 :table-option="categoryOption" show-field="name"
                                 :pick-map="{id: 'categoryId', name: 'categoryName'}"/>
       <fast-table-column-select prop="type" label="类型" required width="100"
@@ -15,7 +12,11 @@
       <fast-table-column-input prop="cron" label="执行频率(Cron)" width="180" required/>
       <fast-table-column-input prop="cond" label="数据过滤条件(不含where)" width="180"/>
       <fast-table-column-switch prop="zip" label="是否压缩"/>
-      <fast-table-column-switch prop="enable" label="是否启用"/>
+      <fast-table-column-switch prop="enable" label="是否启用">
+        <template #normal="{row}">
+          <el-switch v-model="row.row.enable" @change="switchEnable(row.row)"></el-switch>
+        </template>
+      </fast-table-column-switch>
       <fast-table-column-select prop="strategy" label="策略" required width="140"
                                 :options="[{ label: '保留最近指定天数', value: 'd'}, { label: '保留指定条数', value: 'r'}]"
                                 :editable="({editRow}) => editRow.type === 'archive'"/>
@@ -25,9 +26,12 @@
       <fast-table-column-date-picker prop="createTime" label="创建时间" :editable="false" width="180"/>
       <el-table-column label="操作" width="90px" fixed="right">
         <template #default="scope">
-          <el-button link type="primary" size="small" @click="manualRun(scope)">运行一次</el-button>
+          <el-button link type="primary" size="small" @click="runOnce(scope)">运行一次</el-button>
         </template>
       </el-table-column>
+      <template #button="scope">
+        <el-button :size="scope.size" type="primary" plain @click="inputRun">输入执行</el-button>
+      </template>
     </fast-table>
   </div>
 </template>
@@ -36,6 +40,7 @@
 import {FastTableOption, FastTableColumn} from 'fast-crud-ui3'
 import {h} from 'vue'
 import http from '../http'
+import BakArchiveParamForm from "../components/BakArchiveParamForm.vue"
 
 export default {
   name: "TaskConfig",
@@ -46,6 +51,7 @@ export default {
         baseUrl: 'taskConfig',
         createTimeField: 'createTime',
         style: {
+          size: 'mini',
           flexHeight: true
         }
       }),
@@ -64,17 +70,58 @@ export default {
   },
   methods: {
     handleTypeChange(val, {row: {editRow}}) {
-      if (val === 'bak') {
+      if (val === 'bak') { // 重新置空策略值，避免脏数据
         editRow.strategy = null;
         editRow.strategyValue = null;
       }
     },
-    inputRun() {
-      // TODO 输入执行
+    switchEnable(row) {
+      const {id, enable} = row;
+      const url = `/taskConfig/${enable ? 'enable' : 'disable'}/${id}`
+      this.$http.post(url).then(({data}) => {
+        if (data === true) {
+          this.$message.success('操作成功')
+        } else {
+          this.$message.error('操作失败')
+        }
+      })
     },
-    manualRun(scope) {
-      const {row: {row: {id}}} = scope
-      http.post(`/task/run/${id}`)
+    inputRun() {
+      util.openDialog({
+        component: BakArchiveParamForm, dialogProps: {
+          title: '手动输入参数执行备份/归档',
+          width: '50%',
+          size: 'small'
+        }
+      }).then((data) => {
+        const {type, ...formData} = data
+        http.post(`/task/${type}`, formData).then(({data: url}) => {
+          this.handleFileUrl(url);
+        })
+      })
+    },
+    runOnce(scope) {
+      const {row: {row}} = scope
+      this.$confirm('确定要运行一次吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消'
+      }).then(() => {
+        http.post(`/task/run/${row.id}`).then(({code, data: url, msg}) => {
+          if(code === 0) {
+            this.handleFileUrl(url);
+          } else {
+            this.$message.error(msg || "执行失败")
+          }
+        })
+      })
+    },
+    handleFileUrl(url) {
+      const baseURL = this.$http.defaults.baseURL
+      this.$notify({
+        title: '执行成功!',
+        dangerouslyUseHTMLString: true,
+        message: `<div><a href="${baseURL + url}">点击下载</a>, 你也可以稍后去【操作记录】中找到此次执行记录进行下载</div>`
+      });
     }
   }
 }

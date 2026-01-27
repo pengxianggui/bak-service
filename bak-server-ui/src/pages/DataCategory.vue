@@ -25,6 +25,7 @@ export default {
         sortField: 'createTime',
         createTimeField: 'createTime',
         style: {
+          size: 'mini',
           flexHeight: true
         }
       })

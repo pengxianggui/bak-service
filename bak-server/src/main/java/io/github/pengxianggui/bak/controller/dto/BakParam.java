@@ -11,7 +11,7 @@ import lombok.Data;
  */
 @Data
 public class BakParam {
-    @ApiModelProperty(value = "数据类目编码(给了这个值，就可以不给数据库名和表名了)")
+    @ApiModelProperty(value = "数据品类编码(给了这个值，也可以不给数据库名和表名了)")
     private String categoryCode;
     @ApiModelProperty(value = "数据库名")
     private String dbName;

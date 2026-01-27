@@ -2,7 +2,7 @@ import axios from "axios";
 import {ElMessage} from "element-plus";
 
 const http = axios.create({
-    baseURL: '/api'
+    baseURL: process.env.VUE_APP_MODE === 'toBackend' ? '' : '/api',
 });
 
 http.interceptors.request.use(

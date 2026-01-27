@@ -92,7 +92,7 @@ public class DumpManager {
                                    boolean zip) throws IOException {
         DumpExecutor dumpExecutor = dumpConfig.getExecutor(categoryCode);
         WhereCondition condition = new WhereCondition(whereCondition);
-        String outputDirPath = StrUtil.blankToDefault(outputDir, dumpConfig.getDefaultBakDir())
+        String outputDirPath = StrUtil.blankToDefault(outputDir, dumpConfig.getBakDir())
                 + File.separator + dbName + File.separator + tableName + File.separator
                 + DateUtil.format(new Date(), DatePattern.PURE_DATETIME_PATTERN);
         String outputFileName = tableName + ".sql";
@@ -160,7 +160,7 @@ public class DumpManager {
         WhereCondition condition = new WhereCondition(whereCondition);
         Assert.isTrue(condition.getConditions().stream().noneMatch(c -> timeFieldName.endsWith(c.getField())),
                 "自定义where条件( " + whereCondition + ")中应避免再使用归档策略中参考的时间字段:" + timeFieldName);
-        String outputDirPath = StrUtil.blankToDefault(outputDir, dumpConfig.getDefaultArchiveDir())
+        String outputDirPath = StrUtil.blankToDefault(outputDir, dumpConfig.getArchiveDir())
                 + File.separator + dbName + File.separator + tableName + File.separator
                 + DateUtil.format(new Date(), DatePattern.PURE_DATETIME_PATTERN);
         String outputFileName = tableName + ".sql";
@@ -202,7 +202,7 @@ public class DumpManager {
                                       String outputFileName,
                                       boolean zip
     ) throws IOException {
-        String outputDirPath = StrUtil.blankToDefault(outputDir, dumpConfig.getDefaultExportDir())
+        String outputDirPath = StrUtil.blankToDefault(outputDir, dumpConfig.getExportDir())
                 + File.separator + dbName + File.separator + tableName + File.separator
                 + DateUtil.format(new Date(), DatePattern.PURE_DATETIME_PATTERN);
         DumpExecutor dumpExecutor = dumpConfig.getExecutor(categoryCode);

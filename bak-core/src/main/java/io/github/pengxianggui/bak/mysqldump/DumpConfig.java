@@ -40,15 +40,15 @@ public class DumpConfig {
     // 默认导出文件输出目录
     @Getter
     @Setter
-    private String defaultExportDir;
+    private String exportDir;
     // 默认备份文件输出目录
     @Getter
     @Setter
-    private String defaultBakDir;
+    private String bakDir;
     // 默认归档文件输出目录
     @Getter
     @Setter
-    private String defaultArchiveDir;
+    private String archiveDir;
     // 阈值检测脚本路径
     @Getter
     @Setter
@@ -65,7 +65,6 @@ public class DumpConfig {
     @Getter
     @Setter
     private String restoreScriptPath = "classpath:shell/run_restore.sh";
-
     private File thresholdScript;
     private File bakScript;
     private File archiveScript;
@@ -154,18 +153,18 @@ public class DumpConfig {
         return this;
     }
 
-    public DumpConfig defaultBakDir(String defaultBakDir) {
-        this.defaultBakDir = defaultBakDir;
+    public DumpConfig bakDir(String defaultBakDir) {
+        this.bakDir = defaultBakDir;
         return this;
     }
 
-    public DumpConfig defaultArchiveDir(String defaultArchiveDir) {
-        this.defaultArchiveDir = defaultArchiveDir;
+    public DumpConfig archiveDir(String defaultArchiveDir) {
+        this.archiveDir = defaultArchiveDir;
         return this;
     }
 
-    public DumpConfig defaultExportDir(String defaultExportDir) {
-        this.defaultExportDir = defaultExportDir;
+    public DumpConfig exportDir(String defaultExportDir) {
+        this.exportDir = defaultExportDir;
         return this;
     }
 

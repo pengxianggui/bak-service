@@ -42,7 +42,7 @@ public class TaskService {
     @Autowired
     private FileManager fileManager;
 
-    public File run(Long id) throws IOException {
+    public String run(Long id) throws IOException {
         TaskConfig taskConfig = taskConfigService.getById(id);
         Assert.notNull(taskConfig, "任务配置不存在!");
         TaskType taskType = TaskType.valueOf(taskConfig.getType());
@@ -75,10 +75,11 @@ public class TaskService {
             Assert.isTrue(file != null && file.exists(), "生成的文件不存在!");
             String fileUrl = fileManager.getFileService().upload(file);
             oprLog.setSuccess(Boolean.TRUE);
-            oprLog.setFilePath(fileUrl);
+            oprLog.setFileUrl(oprLogService.getPreviewUrl(fileUrl));
+            oprLog.setFilePath(file.getAbsolutePath());
             oprLog.setMsg(result.getLogAsStr());
             oprLog.setExpiredDate(taskConfig.getKeepFate() == null ? null : DateUtil.offsetDay(new Date(), taskConfig.getKeepFate()).toLocalDateTime().toLocalDate());
-            return file;
+            return oprLog.getFileUrl();
         } catch (Exception e) {
             oprLog.setSuccess(Boolean.FALSE);
             oprLog.setMsg(e.getMessage());
@@ -92,7 +93,7 @@ public class TaskService {
         }
     }
 
-    public File bak(BakParam param) throws IOException {
+    public String bak(BakParam param) throws IOException {
         OprLog oprLog = new OprLog();
         String categoryCode = param.getCategoryCode();
         String categoryName = null;
@@ -113,16 +114,17 @@ public class TaskService {
         oprLog.setCond(param.getCond());
         oprLog.setType(TaskType.bak.name());
         try {
-            ExecuteResult<File> result = dumpManager.bak(param.getCategoryCode(), param.getDbName(), param.getTableName(), param.getCond(), null, param.getZip());
+            ExecuteResult<File> result = dumpManager.bak(categoryCode, dbName, tableName, param.getCond(), null, param.getZip());
             File file = result.getResult();
             Assert.isTrue(file != null && file.exists(), "生成的文件不存在!");
             String fileUrl = fileManager.getFileService().upload(file);
             oprLog.setSuccess(Boolean.TRUE);
-            oprLog.setFilePath(fileUrl);
+            oprLog.setFileUrl(oprLogService.getPreviewUrl(fileUrl));
+            oprLog.setFilePath(file.getAbsolutePath());
             oprLog.setMsg(result.getLogAsStr());
             oprLog.setExpiredDate(param.getKeepFate() == null ? null : DateUtil.offsetDay(new Date(), param.getKeepFate()).toLocalDateTime().toLocalDate());
-            return file;
-        } catch (IOException e) {
+            return oprLog.getFileUrl();
+        } catch (Exception e) {
             oprLog.setSuccess(false);
             oprLog.setMsg(e.getMessage());
             throw e;
@@ -135,7 +137,7 @@ public class TaskService {
         }
     }
 
-    public File archive(@Valid ArchiveParam param) throws IOException {
+    public String archive(@Valid ArchiveParam param) throws IOException {
         OprLog oprLog = new OprLog();
         String categoryCode = param.getCategoryCode();
         String categoryName = null;
@@ -159,12 +161,14 @@ public class TaskService {
             ExecuteResult<File> result = dumpManager.archive(param.getCategoryCode(), param.getDbName(), param.getTableName(), param.getTimeFieldName(), param.getCond(), param.getStrategy(), param.getStrategyValue(), null, param.getZip());
             File file = result.getResult();
             Assert.isTrue(file != null && file.exists(), "生成的文件不存在!");
+            String fileUrl = fileManager.getFileService().upload(file);
             oprLog.setSuccess(Boolean.TRUE);
+            oprLog.setFileUrl(oprLogService.getPreviewUrl(fileUrl));
             oprLog.setFilePath(file.getAbsolutePath());
             oprLog.setMsg(result.getLogAsStr());
             oprLog.setExpiredDate(param.getKeepFate() == null ? null : DateUtil.offsetDay(new Date(), param.getKeepFate()).toLocalDateTime().toLocalDate());
-            return file;
-        } catch (IOException e) {
+            return oprLog.getFileUrl();
+        } catch (Exception e) {
             oprLog.setSuccess(Boolean.FALSE);
             oprLog.setMsg(e.getMessage());
             throw e;
@@ -196,7 +200,7 @@ public class TaskService {
             ExecuteResult<Boolean> result = dumpManager.restore(categoryCode, dbName, file);
             newOprLog.setSuccess(result.getResult());
             newOprLog.setMsg(result.getLogAsStr());
-        } catch (IOException e) {
+        } catch (Exception e) {
             newOprLog.setSuccess(Boolean.FALSE);
             newOprLog.setMsg(e.getMessage());
             throw e;
@@ -235,7 +239,8 @@ public class TaskService {
             Assert.isTrue(file != null && file.exists(), "生成的文件不存在!");
             String fileUrl = fileManager.getFileService().upload(file);
             oprLog.setSuccess(Boolean.TRUE);
-            oprLog.setFilePath(fileUrl);
+            oprLog.setFileUrl(oprLogService.getPreviewUrl(fileUrl));
+            oprLog.setFilePath(file.getAbsolutePath());
             oprLog.setMsg(result.getLogAsStr());
             oprLog.setExpiredDate(param.getKeepFate() == null ? null : DateUtil.offsetDay(new Date(), param.getKeepFate()).toLocalDateTime().toLocalDate());
             return file;
