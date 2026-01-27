@@ -1,11 +1,12 @@
 package io.github.pengxianggui.bak.mysqldump;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ZipUtil;
 import io.github.pengxianggui.bak.ArchiveStrategyType;
 import io.github.pengxianggui.bak.BakException;
 import io.github.pengxianggui.bak.util.CommandUtil;
-import io.github.pengxianggui.bak.util.FileUtil;
+import io.github.pengxianggui.bak.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -52,6 +53,12 @@ public abstract class DumpExecutor {
      */
     ExecuteResult<File> export(String dbIp, int dbPort, String dbUsername, String dbPassword, String dbName, String tableName,
                                WhereCondition condition, String outputDirPath, String outputFileName, boolean zip) throws IOException {
+        Assert.notBlank(dbIp, () -> BakException.exportEx("数据库IP不能为空"));
+        Assert.notBlank(dbUsername, () -> BakException.exportEx("数据库用户名不能为空"));
+        Assert.notBlank(dbName, () -> BakException.exportEx("数据库名不能为空"));
+        Assert.notBlank(tableName, () -> BakException.exportEx("表名不能为空"));
+        Assert.notBlank(outputDirPath, () -> BakException.exportEx("输出目录不能为空"));
+        Assert.notBlank(outputFileName, () -> BakException.exportEx("输出文件名不能为空"));
         final String regex = ".*\\.(txt|csv|sql|xlsx)$";
         Assert.isTrue(Pattern.matches(regex, outputFileName),
                 () -> BakException.exportEx("不支持的文件后缀: %s, 只支持导出txt|csv|sql|xlsx", outputFileName));
@@ -100,17 +107,17 @@ public abstract class DumpExecutor {
     /**
      * 还原数据
      *
-     * @param dbIp        数据库IP
-     * @param dbPort      数据库端口
-     * @param dbUsername  数据库用户名
-     * @param dbPassword  数据库密码
-     * @param dbName      数据库名
-     * @param bakFilePath 备份文件路径
+     * @param dbIp       数据库IP
+     * @param dbPort     数据库端口
+     * @param dbUsername 数据库用户名
+     * @param dbPassword 数据库密码
+     * @param dbName     数据库名
+     * @param bakFile    备份文件
      */
     ExecuteResult<Boolean> restore(String dbIp, int dbPort, String dbUsername, String dbPassword, String dbName,
-                                   String bakFilePath) throws IOException {
-        File bakFile = new File(bakFilePath);
+                                   File bakFile) throws IOException {
         Assert.isTrue(bakFile.exists(), () -> BakException.restoreEx("备份文件不存在: %s", bakFile.getAbsolutePath()));
+        String bakFilePath = FileUtil.getName(bakFile);
         Assert.isTrue(bakFilePath.endsWith(".zip") || bakFilePath.endsWith(".sql"),
                 () -> BakException.restoreEx("备份文件格式不正确: %s, 只能针对.zip或.sql执行还原", bakFile.getAbsolutePath()));
 
@@ -122,7 +129,7 @@ public abstract class DumpExecutor {
         List<File> executeFiles = new ArrayList<>();
         if (bakFilePath.endsWith(".zip")) {
             // 解压
-            List<File> files = FileUtil.unzip(bakFile);
+            List<File> files = FileUtils.unzip(bakFile);
             Assert.isTrue(!files.isEmpty(), () -> BakException.restoreEx("zip文件解压后没有内容!请检查备份文件: %s", bakFilePath));
             for (File f : files) {
                 Assert.isTrue(f.exists(), () -> BakException.restoreEx("无法执行还原！备份文件可能被删了: %s", f.getAbsolutePath()));
@@ -195,7 +202,7 @@ public abstract class DumpExecutor {
         }
 
         log.debug("压缩文件已生成: {}, 文件大小: {}", zipFile.getAbsolutePath(), zipFile.length());
-        if (!FileUtil.delete(file)) {
+        if (!FileUtil.del(file)) {
             log.error("临时备份文件删除失败: {}", file.getAbsolutePath());
         }
         return zipFile;

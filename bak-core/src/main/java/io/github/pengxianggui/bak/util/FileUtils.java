@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class FileUtil {
+public class FileUtils {
 
 
     /**
@@ -59,7 +59,7 @@ public class FileUtil {
         if (filePath.startsWith("classpath:")) {
             // 类路径文件处理
             String resourcePath = filePath.substring("classpath:".length());
-            InputStream inputStream = FileUtil.class.getClassLoader().getResourceAsStream(resourcePath);
+            InputStream inputStream = FileUtils.class.getClassLoader().getResourceAsStream(resourcePath);
 
             if (inputStream == null) {
                 throw new IOException("Resource not found in classpath: " + resourcePath);

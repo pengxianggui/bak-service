@@ -24,7 +24,7 @@
         <jsqlparser.version>4.9</jsqlparser.version>
         <bak-core.version>0.0.1-SNAPSHOT</bak-core.version>
         <bak-spring-boot-starter.version>0.0.1-SNAPSHOT</bak-spring-boot-starter.version>
-        <fast-crud.version>1.0.0-SNAPSHOT</fast-crud.version>
+        <fast-crud.version>1.5.10</fast-crud.version>
     </properties>
 
     <dependencies>

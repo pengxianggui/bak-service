@@ -1,22 +1,18 @@
 package io.github.pengxianggui.bak.controller;
 
-import io.github.pengxianggui.crud.dynamic.Crud;
-import io.github.pengxianggui.crud.dynamic.CrudService;
+import io.github.pengxianggui.bak.domain.DataCategory;
 import io.github.pengxianggui.bak.service.DataCategoryService;
+import io.github.pengxianggui.crud.BaseController;
 import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
-
-@Api(tags="数据品类")
+@Api(tags = "数据类目")
 @RestController
 @RequestMapping("dataCategory")
-@Crud
-public class DataCategoryController {
+public class DataCategoryController extends BaseController<DataCategory> {
 
-    @Resource
-    @CrudService
-    private DataCategoryService dataCategoryService;
-
+    public DataCategoryController(DataCategoryService dataCategoryService) {
+        super(dataCategoryService, DataCategory.class);
+    }
 }

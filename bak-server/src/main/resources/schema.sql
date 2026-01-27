@@ -25,8 +25,8 @@ CREATE TABLE IF NOT EXISTS `opr_log`
 (
     `id`            bigint(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
     `operator`      varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '操作人',
-    `category_code` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci  NOT NULL COMMENT '操作的数据品类编码',
-    `category_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '操作的数据品类名',
+    `category_code` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci  NOT NULL COMMENT '操作的数据类目编码',
+    `category_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '操作的数据类目名',
     `db_name`       varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '数据库名',
     `table_name`    varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '表名',
     `type`          varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci  NOT NULL COMMENT '类型(bak-备份;archive-归档;restore-还原)',
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `data_category`
     `update_time`     datetime                                                      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE INDEX `uk_code`(`code`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '数据品类' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '数据类目' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for task_config
@@ -65,8 +65,8 @@ CREATE TABLE IF NOT EXISTS `data_category`
 CREATE TABLE IF NOT EXISTS `task_config`
 (
     `id`             bigint(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `category_id`    bigint(11) NOT NULL COMMENT '数据品类id',
-    `category_name`  varchar(255) NOT NULL COMMENT '数据品类名',
+    `category_id`    bigint(11) NOT NULL COMMENT '数据类目id',
+    `category_name`  varchar(255) NOT NULL COMMENT '数据类目名',
     `type`           varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci  NOT NULL DEFAULT 'bak' COMMENT '任务类型(bak-备份;archive-归档)',
     `cron`           varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci  NOT NULL COMMENT '执行频率。cron表达式',
     `path`           varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '存储路径。绝对路径',

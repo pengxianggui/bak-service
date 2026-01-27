@@ -10,13 +10,13 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import javax.validation.Valid;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,9 +32,9 @@ import java.io.IOException;
 @RestController
 @RequestMapping("task")
 public class TaskController {
-    @Resource
+    @Autowired
     private TaskService taskService;
-    @Resource
+    @Autowired
     private OprLogService oprLogService;
 
     @ApiOperation(value = "基于任务配置执行一次备份/归档", notes = "并返回生成的文件路径, 前端可调用【备份记录】>【备份/归档文件下载】接口进行下载")
@@ -42,7 +42,7 @@ public class TaskController {
     public Result<String> run(@ApiParam("任务配置id") @PathVariable("id") Long taskConfigId) {
         try {
             File file = taskService.run(taskConfigId);
-            return Result.success(oprLogService.getPreviewUrl(file), "任务执行成功, 文件已经生成");
+            return Result.success(oprLogService.getPreviewUrl(file.getAbsolutePath()), "任务执行成功, 文件已经生成");
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             return Result.fail(500, e.getMessage());
@@ -55,7 +55,7 @@ public class TaskController {
     public Result<String> bak(@Valid @RequestBody BakParam param) {
         try {
             File file = taskService.bak(param);
-            return Result.success(oprLogService.getPreviewUrl(file), "手动执行成功, 文件已经生成");
+            return Result.success(oprLogService.getPreviewUrl(file.getAbsolutePath()), "手动执行成功, 文件已经生成");
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             return Result.fail(500, e.getMessage());
@@ -75,10 +75,10 @@ public class TaskController {
     }
 
     @ApiOperation(value = "基于备份记录还原数据")
-    @PostMapping("restore/{backLogId}")
-    public Result<Boolean> restore(@ApiParam("备份记录id(只有类型为bak的执行记录才能执行此操作)") @PathVariable("backLogId") Long backLogId) {
+    @PostMapping("restore/{logId}")
+    public Result<Boolean> restore(@ApiParam("备份记录id(只有类型为bak的执行记录才能执行此操作)") @PathVariable("logId") Long logId) {
         try {
-            taskService.restore(backLogId);
+            taskService.restore(logId);
             return Result.success(true, "还原成功, 请检查数据!");
         } catch (IOException e) {
             log.error(e.getMessage(), e);
@@ -86,7 +86,7 @@ public class TaskController {
         }
     }
 
-    @ApiOperation("按数据品类导出")
+    @ApiOperation("按数据类目导出")
     @GetMapping("/export/{type}")
     public ResponseEntity<InputStreamResource> exportByCategory(@ApiParam("csv、sql、txt、xlsx") @PathVariable("type") FileSuffix type,
                                                                 @Valid @RequestBody BakParam bakParam) throws IOException {

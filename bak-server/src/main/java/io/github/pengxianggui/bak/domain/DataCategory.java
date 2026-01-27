@@ -12,7 +12,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @TableName("data_category")
-@ApiModel(value = "DataCategory对象", description = "数据品类")
+@ApiModel(value = "DataCategory对象", description = "数据类目")
 public class DataCategory {
 
     @ApiModelProperty("主键")

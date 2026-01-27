@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class CommandUtil {
@@ -35,7 +36,7 @@ public class CommandUtil {
         List<String> logs = new ArrayList<>();
         args = escapeArgs(args);
         // 构建ProcessBuilder
-        ProcessBuilder processBuilder = new ProcessBuilder(args);
+        ProcessBuilder processBuilder = inheritEnv(new ProcessBuilder(args), false);
         processBuilder.redirectErrorStream(true);  // 将 stderr 合并到 stdout
         // 执行脚本
         Process process = processBuilder.start();
@@ -79,6 +80,33 @@ public class CommandUtil {
             }
         }
         return args;
+    }
+
+    /**
+     * 继承环境变量
+     *
+     * @param processBuilder
+     * @param inheritIO      是否继承IO, 若true, 脚本执行的日志会管道重定向到java进程。会导致process.getInputStream拿不到内容。
+     * @return
+     */
+    public static ProcessBuilder inheritEnv(ProcessBuilder processBuilder, boolean inheritIO) {
+        Map<String, String> env = processBuilder.environment();
+        String currentPath = System.getenv("PATH");
+
+        // 补全所有可能的路径：
+        // /opt/homebrew/bin (Mac M1)
+        // /usr/local/mysql/bin (Mac Intel / Linux 默认)
+        // /usr/bin:/bin (基础路径)
+        String extraPaths = "/opt/homebrew/bin:/usr/local/opt/mysql-client/bin/:/usr/local/bin:/usr/local/mysql/bin";
+        env.put("PATH", extraPaths + ":" + currentPath);
+        log.debug("env:");
+        for (Map.Entry<String, String> entry : env.entrySet()) {
+            log.debug("{}={}", entry.getKey(), entry.getValue());
+        }
+        if (inheritIO) {
+            processBuilder.inheritIO();
+        }
+        return processBuilder;
     }
 
     public static void main(String[] args) {

@@ -1,14 +1,13 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
+import {createApp} from 'vue'
+import ElementPlus from 'element-plus'
 import App from './App.vue'
-import ElementUI from 'element-ui'
-import "element-ui/lib/theme-chalk/index.css";
-import FastCrudUI from 'fast-crud-ui'
-import "fast-crud-ui/lib/style.css"
+import "element-plus/theme-chalk/index.css"
+import zhCn from 'element-plus/es/locale/lang/zh-cn'
+import {createRouter, createWebHashHistory} from 'vue-router'
+import FastCrudUI from 'fast-crud-ui3'
+import "fast-crud-ui3/lib/style.css"
 import http from './http'
 
-Vue.config.productionTip = false
-Vue.use(VueRouter)
 const routes = [
     {
         path: '/',
@@ -29,16 +28,17 @@ const routes = [
         component: () => import('./pages/OprLog.vue')
     }
 ]
-const router = new VueRouter({
+const router = createRouter({
+    history: createWebHashHistory(),
     routes: routes
 })
 
-Vue.use(ElementUI)
-Vue.use(FastCrudUI, {
-    $http: http
+const app = createApp(App)
+app.use(ElementPlus, {
+    locale: zhCn
 })
-
-new Vue({
-    router,
-    render: h => h(App),
-}).$mount('#app')
+app.use(FastCrudUI, {
+    $http: http,
+    $router: router
+}).use(router)
+app.mount('#app')

@@ -6,6 +6,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import io.github.pengxianggui.bak.ArchiveStrategyType;
 import io.github.pengxianggui.bak.BakException;
+import io.github.pengxianggui.bak.TaskManager;
 import io.github.pengxianggui.bak.util.CommandUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * dump操作核心类
@@ -55,7 +57,7 @@ public class DumpManager {
                     scriptFile.getAbsolutePath(),
                     dumpConfig.getDbIp(),
                     dumpConfig.getDbPortAsStr(),
-                    dumpConfig.getDbUseruame(),
+                    dumpConfig.getDbUsername(),
                     dumpConfig.getDbPassword(),
                     dbName,
                     tableName,
@@ -73,7 +75,7 @@ public class DumpManager {
     /**
      * 执行备份
      *
-     * @param categoryCode   数据品类编码
+     * @param categoryCode   数据类目编码
      * @param dbName         库名
      * @param tableName      表名
      * @param whereCondition where条件
@@ -97,7 +99,7 @@ public class DumpManager {
         return dumpExecutor.bak(
                 dumpConfig.getDbIp(),
                 dumpConfig.getDbPort(),
-                dumpConfig.getDbUseruame(),
+                dumpConfig.getDbUsername(),
                 dumpConfig.getDbPassword(),
                 dbName,
                 tableName,
@@ -111,28 +113,28 @@ public class DumpManager {
     /**
      * 备份还原
      *
-     * @param categoryCode 数据品类编码
+     * @param categoryCode 数据类目编码
      * @param dbName       数据库名
-     * @param bakFilePath  备份文件路径
+     * @param bakFile      备份文件
      */
     public ExecuteResult<Boolean> restore(String categoryCode,
                                           String dbName,
-                                          String bakFilePath) throws IOException {
+                                          File bakFile) throws IOException {
         DumpExecutor dumpExecutor = dumpConfig.getExecutor(categoryCode);
         return dumpExecutor.restore(
                 dumpConfig.getDbIp(),
                 dumpConfig.getDbPort(),
-                dumpConfig.getDbUseruame(),
+                dumpConfig.getDbUsername(),
                 dumpConfig.getDbPassword(),
                 dbName,
-                bakFilePath);
+                bakFile);
     }
 
 
     /**
      * 执行归档
      *
-     * @param categoryCode   数据品类编码
+     * @param categoryCode   数据类目编码
      * @param dbName         库名
      * @param tableName      表名
      * @param whereCondition where条件
@@ -152,7 +154,7 @@ public class DumpManager {
                                        Integer strategyValue,
                                        String outputDir,
                                        boolean zip) throws IOException {
-        Assert.notBlank(timeFieldName, () -> BakException.archiveEx("归档必须提供时间字段, 请检查对应数据品类配置"));
+        Assert.notBlank(timeFieldName, () -> BakException.archiveEx("归档必须提供时间字段, 请检查对应数据类目配置"));
 
         DumpExecutor dumpExecutor = dumpConfig.getExecutor(categoryCode);
         WhereCondition condition = new WhereCondition(whereCondition);
@@ -165,7 +167,7 @@ public class DumpManager {
         return dumpExecutor.archive(
                 dumpConfig.getDbIp(),
                 dumpConfig.getDbPort(),
-                dumpConfig.getDbUseruame(),
+                dumpConfig.getDbUsername(),
                 dumpConfig.getDbPassword(),
                 dbName,
                 tableName,
@@ -182,7 +184,7 @@ public class DumpManager {
     /**
      * 导出数据
      *
-     * @param categoryCode   数据品类编码, 用于定位自定义dump执行器。可空，则为默认dump执行器
+     * @param categoryCode   数据类目编码, 用于定位自定义dump执行器。可空，则为默认dump执行器
      * @param dbName         数据库名
      * @param tableName      表名
      * @param whereCondition where条件。如"id>10"
@@ -208,7 +210,7 @@ public class DumpManager {
         return dumpExecutor.export(
                 dumpConfig.getDbIp(),
                 dumpConfig.getDbPort(),
-                dumpConfig.getDbUseruame(),
+                dumpConfig.getDbUsername(),
                 dumpConfig.getDbPassword(),
                 dbName,
                 tableName,
@@ -230,7 +232,7 @@ public class DumpManager {
             String which = os.contains("win") ? "where.exe" : "which";
 
             // 执行命令
-            Process process = new ProcessBuilder(which, commandName).start();
+            Process process = CommandUtil.inheritEnv(new ProcessBuilder(which, commandName), false).start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line = reader.readLine();
             process.waitFor();

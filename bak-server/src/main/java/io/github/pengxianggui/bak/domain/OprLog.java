@@ -23,10 +23,10 @@ public class OprLog {
     @ApiModelProperty("操作人")
     private String operator;
 
-    @ApiModelProperty("操作的数据品类编码")
+    @ApiModelProperty("操作的数据类目编码")
     private String categoryCode;
 
-    @ApiModelProperty("操作的数据品类名")
+    @ApiModelProperty("操作的数据类目名")
     private String categoryName;
 
     @ApiModelProperty("数据库名")
@@ -47,8 +47,8 @@ public class OprLog {
     @ApiModelProperty("(文件)失效日期")
     private LocalDate expiredDate;
 
-    @ApiModelProperty("(文件)失效日期")
-    private LocalDateTime expired;
+    @ApiModelProperty("(文件)是否失效")
+    private Boolean expired;
 
     @ApiModelProperty("where条件")
     private String cond;

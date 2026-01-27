@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
  * <p>
- * 数据品类 Mapper 接口
+ * 数据类目 Mapper 接口
  * </p>
  *
  * @author pengxg

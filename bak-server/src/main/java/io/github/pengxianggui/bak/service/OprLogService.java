@@ -7,5 +7,5 @@ import java.io.File;
 
 public interface OprLogService extends BaseService<OprLog> {
 
-    String getPreviewUrl(File file);
+    String getPreviewUrl(String filePath);
 }

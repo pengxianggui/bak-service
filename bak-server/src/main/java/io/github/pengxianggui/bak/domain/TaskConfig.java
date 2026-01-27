@@ -20,10 +20,10 @@ public class TaskConfig {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    @ApiModelProperty("数据品类id")
+    @ApiModelProperty("数据类目id")
     private Long categoryId;
 
-    @ApiModelProperty("数据品类名")
+    @ApiModelProperty("数据类目名")
     private String categoryName;
 
     @ApiModelProperty("任务类型(bak-备份;archive-归档)")

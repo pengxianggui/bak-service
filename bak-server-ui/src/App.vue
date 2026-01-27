@@ -7,7 +7,7 @@
       </el-menu-item>
       <el-menu-item index="/data-category">
         <i class="el-icon-document"></i>
-        <span slot="title">数据品类</span>
+        <span slot="title">数据类目</span>
       </el-menu-item>
       <el-menu-item index="/opr-log">
         <i class="el-icon-setting"></i>
@@ -31,6 +31,7 @@ export default {
 
 <style>
 html, body, #app {
+  width: 100%;
   height: 100%;
   margin: 0;
   padding: 0;
