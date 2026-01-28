@@ -33,11 +33,12 @@ if [ -z "$WHERE_CONDITION" ]; then
 fi
 echo $WHERE_CONDITION
 if [ $STRATEGY == "d" ]; then
-  mysqldump -h "${MYSQL_IP}" -P ${MYSQL_PORT} -u "${MYSQL_USERNAME}" -p"${MYSQL_PASSWORD}" --single-transaction --quick --no-create-info "$DB_NAME" "$TABLE_NAME" --where="$TIME_FIELD <= '$STRATEGY_VALUE' AND $WHERE_CONDITION" > "$OUTPUT_FILE"
+  mysqldump -h "${MYSQL_IP}" -P ${MYSQL_PORT} -u "${MYSQL_USERNAME}" -p"${MYSQL_PASSWORD}" --single-transaction --quick --no-create-info "$DB_NAME" "$TABLE_NAME" --where="$TIME_FIELD <= '$STRATEGY_VALUE' AND $WHERE_CONDITION" --default-character-set=utf8 > "$OUTPUT_FILE"
 elif [ $STRATEGY == "r" ]; then
-  mysqldump -h "${MYSQL_IP}" -P ${MYSQL_PORT} -u "${MYSQL_USERNAME}" -p"${MYSQL_PASSWORD}" --single-transaction --quick --no-create-info "$DB_NAME" "$TABLE_NAME" --where="$TIME_FIELD <= (SELECT $TIME_FIELD FROM $TABLE_NAME WHERE $WHERE_CONDITION ORDER BY $TIME_FIELD DESC LIMIT $STRATEGY_VALUE, 1) AND $WHERE_CONDITION" > "$OUTPUT_FILE"
+  mysqldump -h "${MYSQL_IP}" -P ${MYSQL_PORT} -u "${MYSQL_USERNAME}" -p"${MYSQL_PASSWORD}" --single-transaction --quick --no-create-info "$DB_NAME" "$TABLE_NAME" --where="$TIME_FIELD <= (SELECT $TIME_FIELD FROM $TABLE_NAME WHERE $WHERE_CONDITION ORDER BY $TIME_FIELD DESC LIMIT $STRATEGY_VALUE, 1) AND $WHERE_CONDITION" --default-character-set=utf8 > "$OUTPUT_FILE"
 else
   echo "策略参数(${STRATEGY})错误，请检查!"
+  echo
   exit 1
 fi
 
@@ -48,10 +49,12 @@ if [ $? -eq 0 ]; then
       DELETE_SQL="DELETE t FROM $TABLE_NAME t JOIN (SELECT $TIME_FIELD FROM $TABLE_NAME WHERE $WHERE_CONDITION ORDER BY $TIME_FIELD DESC LIMIT $STRATEGY_VALUE, 1) AS tmp ON t.$TIME_FIELD <= tmp.$TIME_FIELD WHERE $WHERE_CONDITION;"
     else
       echo "策略参数(${STRATEGY})错误，请检查!"
+      echo
       exit 1
     fi
-
+    echo
     echo "删除此次针对 $TABLE_NAME 表中已归档的数据, 删除语句: ${DELETE_SQL}"
+    echo
     mysql -h "${MYSQL_IP}" -P ${MYSQL_PORT} -u "${MYSQL_USERNAME}" -p"${MYSQL_PASSWORD}" -D "$DB_NAME" -e "$DELETE_SQL"
 else
     echo "归档 $TABLE_NAME 时出错，未执行删除操作。" >&2

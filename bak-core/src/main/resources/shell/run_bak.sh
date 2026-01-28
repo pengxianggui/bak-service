@@ -27,6 +27,7 @@ FILE_EXTENSION="${OUTPUT_FILE##*.}"
 # 如果文件后缀不是sql、txt、csv，则直接退出
 if [[ ! "$FILE_EXTENSION" =~ ^(sql|txt|csv|xlsx)$ ]]; then
   echo "Invalid file extension: $FILE_EXTENSION, only support: sql,txt,csv"
+  echo
   exit 1
 fi
 
@@ -96,6 +97,7 @@ else
           ;;
       *)
           echo "Unsupported file format: $FILE_EXTENSION"
+          echo
           exit 1
           ;;
   esac

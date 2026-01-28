@@ -34,6 +34,7 @@ const router = createRouter({
 })
 
 const app = createApp(App)
+app.config.globalProperties.$http = http
 app.use(ElementPlus, {
     locale: zhCn
 })

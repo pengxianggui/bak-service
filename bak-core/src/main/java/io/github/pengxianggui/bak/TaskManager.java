@@ -1,5 +1,6 @@
 package io.github.pengxianggui.bak;
 
+import cn.hutool.core.lang.Assert;
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.pattern.CronPattern;
 import cn.hutool.cron.task.Task;
@@ -18,7 +19,7 @@ public class TaskManager {
     @PostConstruct
     public void init() {
         log.debug("Task manager init..");
-        CronUtil.setMatchSecond(Boolean.TRUE);
+        CronUtil.setMatchSecond(Boolean.FALSE); // 明确"分匹配", cron表达式得5位
         CronUtil.restart();
     }
 
@@ -34,23 +35,22 @@ public class TaskManager {
      * @param runnable 执行函数
      */
     public boolean start(String taskId, String cron, Runnable runnable) {
+        Assert.notBlank(taskId);
+        Assert.isTrue(validCron(cron), "cron表达式异常:{}", cron);
+        log.info("Task:[{}] is starting...", taskId);
         Task task = CronUtil.getScheduler().getTask(taskId);
         // 已经在运行中，并且cron没有变化，则不做处理
         if (isRunning(taskId) && cron.equals(CronUtil.getScheduler().getPattern(taskId).toString())) {
             return true;
         }
-
         // 重启
         if (task != null) {
             CronUtil.remove(taskId);
         }
-        CronUtil.schedule(taskId, cron, () -> {
-            log.debug("Task:[{}] is executing...", taskId);
-            runnable.run();
-        });
+        CronUtil.schedule(taskId, cron, runnable::run);
         boolean flag = isRunning(taskId);
         if (flag) {
-            log.debug("Task:[{}] start success...", taskId);
+            log.info("Task:[{}] start success...", taskId);
         } else {
             log.error("Task:[{}] start failed!", taskId);
         }
@@ -63,16 +63,18 @@ public class TaskManager {
      * @param taskId 任务id。调用者自行确保唯一性
      */
     public boolean stop(String taskId) {
+        Assert.notBlank(taskId);
+        log.info("Task:[{}] is stopping...", taskId);
         if (!isRunning(taskId)) {
-            log.trace("Task:[{}] has been stop, no need to do it again", taskId);
+            log.debug("Task:[{}] has been stop, no need to do it again", taskId);
             return true;
         }
         CronUtil.remove(taskId);
         boolean flag = !isRunning(taskId);
         if (flag) {
-            log.debug("Task:[{}] stop success...", taskId);
+            log.info("Task:[{}] stop success...", taskId);
         } else {
-            log.error("Task:[{}] stop failed!", taskId);
+            log.info("Task:[{}] stop failed!", taskId);
         }
         return flag;
     }

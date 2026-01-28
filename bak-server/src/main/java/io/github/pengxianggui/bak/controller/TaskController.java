@@ -33,8 +33,6 @@ import java.io.IOException;
 public class TaskController {
     @Autowired
     private TaskService taskService;
-    @Autowired
-    private OprLogService oprLogService;
 
     @ApiOperation(value = "基于任务配置执行一次备份/归档", notes = "并返回生成的文件路径, 前端可调用【备份记录】>【备份/归档文件下载】接口进行下载")
     @PostMapping("run/{id}")

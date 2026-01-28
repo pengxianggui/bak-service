@@ -2,7 +2,7 @@ import axios from "axios";
 import {ElMessage} from "element-plus";
 
 const http = axios.create({
-    baseURL: process.env.VUE_APP_MODE === 'toBackend' ? '' : '/api',
+    baseURL: import.meta.env.VITE_APP_MODE === 'toBackend' ? '' : '/api',
 });
 
 http.interceptors.request.use(
@@ -16,7 +16,11 @@ http.interceptors.request.use(
 http.interceptors.response.use(
     (response) => {
         // 如果后端有自定义响应体, 则返回内层的业务数据
-        return response.data.data;
+        const {code, data, msg} = response.data
+        if (code === 0) {
+            return data;
+        }
+        ElMessage.error(msg)
     },
     (error) => {
         ElMessage.error('系统错误')

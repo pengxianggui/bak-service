@@ -43,6 +43,7 @@ public class TaskService {
     private FileManager fileManager;
 
     public String run(Long id) throws IOException {
+        log.info("Task begin to run, taskId:{}", id);
         TaskConfig taskConfig = taskConfigService.getById(id);
         Assert.notNull(taskConfig, "任务配置不存在!");
         TaskType taskType = TaskType.valueOf(taskConfig.getType());

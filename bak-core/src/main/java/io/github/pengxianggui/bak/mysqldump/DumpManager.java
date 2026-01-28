@@ -6,7 +6,6 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import io.github.pengxianggui.bak.ArchiveStrategyType;
 import io.github.pengxianggui.bak.BakException;
-import io.github.pengxianggui.bak.TaskManager;
 import io.github.pengxianggui.bak.util.CommandUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * dump操作核心类
@@ -79,7 +77,7 @@ public class DumpManager {
      * @param dbName         库名
      * @param tableName      表名
      * @param whereCondition where条件
-     * @param outputDir      输出目录, 若空则取默认配置的路径
+     * @param outputDir      输出目录, 若空则取默认配置的路径(bak.bak-dir)
      * @param zip            是否压缩
      * @return 备份/归档的文件
      * @throws IOException
@@ -140,7 +138,7 @@ public class DumpManager {
      * @param whereCondition where条件
      * @param strategyType   策略类型
      * @param strategyValue  策略值
-     * @param outputDir      输出目录
+     * @param outputDir      输出目录, 若空则取默认配置的路径(bak.archive-dir)
      * @param zip            是否压缩
      * @return 备份/归档的文件
      * @throws IOException
@@ -188,7 +186,7 @@ public class DumpManager {
      * @param dbName         数据库名
      * @param tableName      表名
      * @param whereCondition where条件。如"id>10"
-     * @param outputDir      输出文件目录。若为空则取默认值
+     * @param outputDir      输出文件目录。若为空则取默认配置的路径(bak.export-dir)
      * @param outputFileName 输出文件名,含后缀。注意: 只支持 .sql，.txt, .csv, .xlsx
      * @param zip            是否压缩
      * @return 导出的文件

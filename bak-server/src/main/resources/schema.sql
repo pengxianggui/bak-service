@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS `opr_log`
     `type`          varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci  NOT NULL COMMENT '类型(bak-备份;archive-归档;restore-还原)',
     `success`       bit(1)                                                        NOT NULL COMMENT '操作是否成功',
     `file_path`     varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '生成的文件路径',
+    `file_url`      varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '文件url地址',
     `expired_date`  date NULL DEFAULT NULL COMMENT '(文件)失效日期',
     `expired`       bit(1) DEFAULT b'0' COMMENT '是否失效',
     `cond`          varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'where条件',

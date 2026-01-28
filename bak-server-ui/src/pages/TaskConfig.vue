@@ -2,14 +2,14 @@
   <div class="task-config">
     <fast-table :option="tableOption">
       <fast-table-column prop="id" label="ID" width="60"/>
-      <fast-table-column prop="categoryId" label="数据品类ID" width="120" hidden/>
-      <fast-table-column-object prop="categoryName" label="数据品类名" required :filter="0"
+      <fast-table-column prop="categoryId" label="数据类目ID" width="120" hidden/>
+      <fast-table-column-object prop="categoryName" label="类目名" required :filter="0"
                                 :table-option="categoryOption" show-field="name"
                                 :pick-map="{id: 'categoryId', name: 'categoryName'}"/>
       <fast-table-column-select prop="type" label="类型" required width="100"
                                 :options="[{ label: '备份', value: 'bak'}, { label: '归档', value: 'archive'}]"
                                 @change="handleTypeChange"/>
-      <fast-table-column-input prop="cron" label="执行频率(Cron)" width="180" required/>
+      <fast-table-column-select prop="cron" label="执行频率(Cron)" width="180" required :options="cronList"/>
       <fast-table-column-input prop="cond" label="数据过滤条件(不含where)" width="180"/>
       <fast-table-column-switch prop="zip" label="是否压缩"/>
       <fast-table-column-switch prop="enable" label="是否启用">
@@ -29,34 +29,35 @@
           <el-button link type="primary" size="small" @click="runOnce(scope)">运行一次</el-button>
         </template>
       </el-table-column>
-      <template #button="scope">
-        <el-button :size="scope.size" type="primary" plain @click="inputRun">输入执行</el-button>
-      </template>
+      <!-- 考虑归档操作过于高危，因此先注释手动输入，控制执行的表只能从【数据类目】中定义 -->
+<!--      <template #button="scope">-->
+<!--        <el-button :size="scope.size" type="primary" plain @click="inputRun">输入执行</el-button>-->
+<!--      </template>-->
     </fast-table>
   </div>
 </template>
 
 <script>
-import {FastTableOption, FastTableColumn} from 'fast-crud-ui3'
 import {h} from 'vue'
-import http from '../http'
+import {FastTableOption, FastTableColumn, util} from 'fast-crud-ui3'
 import BakArchiveParamForm from "../components/BakArchiveParamForm.vue"
+import {CronList} from '../dict'
 
 export default {
   name: "TaskConfig",
   data() {
     return {
+      cronList: CronList,
       tableOption: new FastTableOption({
         context: this,
         baseUrl: 'taskConfig',
         createTimeField: 'createTime',
+        enableMulti: false,
         style: {
-          size: 'mini',
           flexHeight: true
         }
       }),
       categoryOption: new FastTableOption({
-        context: this,
         baseUrl: 'dataCategory',
         render: () => {
           return [
@@ -78,49 +79,46 @@ export default {
     switchEnable(row) {
       const {id, enable} = row;
       const url = `/taskConfig/${enable ? 'enable' : 'disable'}/${id}`
-      this.$http.post(url).then(({data}) => {
-        if (data === true) {
-          this.$message.success('操作成功')
-        } else {
-          this.$message.error('操作失败')
-        }
+      this.$http.post(url).then((data) => {
+        this.$message.success(data === true ? '操作成功' : '操作失败')
       })
     },
     inputRun() {
       util.openDialog({
         component: BakArchiveParamForm, dialogProps: {
           title: '手动输入参数执行备份/归档',
-          width: '50%',
-          size: 'small'
+          width: '50%'
         }
       }).then((data) => {
         const {type, ...formData} = data
-        http.post(`/task/${type}`, formData).then(({data: url}) => {
-          this.handleFileUrl(url);
+        this.$http.post(`/task/${type}`, formData).then((data) => {
+          this.handleFileUrl(data);
         })
       })
     },
     runOnce(scope) {
       const {row: {row}} = scope
-      this.$confirm('确定要运行一次吗？', '提示', {
+      const archive = row.type === 'archive'
+      const typeCn = archive ? '归档' : '备份'
+      const tipContext = archive ? '归档操作将剪切表中数据到文件中,会导致表数据减少。请勿对业务表执行此操作!' : ''
+      const tipTitle = `确定要针对【${row.categoryName}】执行一次${typeCn}吗?`
+      this.$confirm(archive ? tipContext : '', tipTitle, {
         confirmButtonText: '确定',
-        cancelButtonText: '取消'
+        cancelButtonText: '取消',
+        type: archive ? 'warning' : ''
       }).then(() => {
-        http.post(`/task/run/${row.id}`).then(({code, data: url, msg}) => {
-          if(code === 0) {
-            this.handleFileUrl(url);
-          } else {
-            this.$message.error(msg || "执行失败")
-          }
+        this.$http.post(`/task/run/${row.id}`).then((data) => {
+          this.handleFileUrl(data);
         })
       })
     },
     handleFileUrl(url) {
       const baseURL = this.$http.defaults.baseURL
+      const finalUrl = (url.startsWith('http://') || url.startsWith('https://')) ? url : (baseURL + url)
       this.$notify({
         title: '执行成功!',
         dangerouslyUseHTMLString: true,
-        message: `<div><a href="${baseURL + url}">点击下载</a>, 你也可以稍后去【操作记录】中找到此次执行记录进行下载</div>`
+        message: `<div><a href="${finalUrl}">点击下载</a>, 你也可以稍后去【操作记录】中找到此次执行记录进行下载</div>`
       });
     }
   }

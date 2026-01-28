@@ -2,9 +2,9 @@ server:
   port: 8088
 spring:
   datasource:
-    url: jdbc:mysql://${DB_IP}:${DB_PORT:3306}/${DB_NAME:bak_server}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://${DB_IP:127.0.0.1}:${DB_PORT:3306}/${DB_NAME:bak_server}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
     username: ${DB_USER:root}
-    password: ${DB_PASS}
+    password: ${DB_PASS:123456}
     driver-class-name: com.mysql.cj.jdbc.Driver
   sql:
     init:
@@ -20,14 +20,25 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 bak:
-  db-ip: ${DB_IP}
+  db-ip: ${DB_IP:127.0.0.1}
   db-port: ${DB_PORT:3306}
   db-username: ${DB_USER:root}
-  db-password: ${DB_PASS}
-  export-dir: ${EXPORT_DIR}
-  bak-dir: ${BAK_DIR}
-  archive-dir: ${ARCHIVE_DIR}
-  threshold-script-path: classpath:shell/over_threshold.sh
-  bak-script-path: classpath:shell/run_bak.sh
-  archive-script-path: classpath:shell/run_archive.sh
-  restore-script-path: classpath:shell/run_restore.sh
+  db-password: ${DB_PASS:123456}
+  export-dir: ${EXPORT_DIR:${user.dir}/export}
+  bak-dir: ${BAK_DIR:${user.dir}/bak}
+  archive-dir: ${ARCHIVE_DIR:${user.dir}/archive}
+  threshold-script-path: ${THRESHOLD_SCRIPT_PATH:classpath:shell/over_threshold.sh}
+  bak-script-path: ${BAK_SCRIPT_PATH:classpath:shell/run_bak.sh}
+  archive-script-path: ${ARCHIVE_SCRIPT_PATH:classpath:shell/run_archive.sh}
+  restore-script-path: ${RESTORE_SCRIPT_PATH:classpath:shell/run_restore.sh}
+
+fast-crud:
+  upload:
+    mode: ${FILE_STORE:local} # 如果使用aliyun,则必须提供aliyun.oss相关配置项
+
+aliyun:
+  oss:
+    endpoint: ${ALIYUN_OSS_ENDPOINT}
+    keyId: ${ALIYUN_OSS_KEY_ID}
+    keySecret: ${ALIYUN_OSS_KEY_SECRET}
+    bucketName: ${ALIYUN_OSS_BUCKET_NAME}

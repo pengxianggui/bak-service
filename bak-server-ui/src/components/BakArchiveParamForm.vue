@@ -10,7 +10,7 @@
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item prop="categoryCode" label="选择数据品类">
+        <el-form-item prop="categoryCode" label="选择数据类目">
           <fast-object-picker v-model="formData.categoryCode"
                               :table-option="categoryOption"
                               :pick-object="formData"
@@ -78,7 +78,8 @@
 </template>
 
 <script>
-import {FastTableOption} from 'fast-crud-ui'
+import {h} from 'vue'
+import {FastTableOption, FastTableColumn} from 'fast-crud-ui3'
 
 export default {
   name: "BakArchiveParamForm",
@@ -109,11 +110,11 @@ export default {
       categoryOption: new FastTableOption({
         context: this,
         module: 'dataCategory',
-        render(h) {
+        render: () => {
           return [
-            h('fast-table-column', {props: {prop: 'id', label: 'id'}}),
-            h('fast-table-column', {props: {prop: 'code', label: '数据品类编码'}}),
-            h('fast-table-column', {props: {prop: 'name', label: '数据品类名', firstFilter: true}})
+            h(FastTableColumn, {prop: 'id', label: 'id'}),
+            h(FastTableColumn, {prop: 'code', label: '数据类目编码'}),
+            h(FastTableColumn, {prop: 'name', label: '数据类目名', firstFilter: true})
           ]
         }
       })

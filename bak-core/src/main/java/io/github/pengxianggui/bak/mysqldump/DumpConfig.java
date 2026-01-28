@@ -20,48 +20,71 @@ import java.util.Map;
 public class DumpConfig {
     private static final DumpExecutor defaultDumpExecutor = new DefaultDumpExecutor();
     private static Map<String, DumpExecutor> EXECUTOR_MAP = new HashMap<>();
+    private static final String USER_DIR = System.getProperty("user.dir");
 
-    // 数据库ip
+    /**
+     * 数据库ip
+     */
     @Getter
     @Setter
     private String dbIp;
-    // 数据库端口
+    /**
+     * 数据库端口
+     */
     @Getter
     @Setter
     private int dbPort;
-    // 数据库用户名
+    /**
+     * 数据库用户名
+     */
     @Getter
     @Setter
     private String dbUsername;
-    // 数据库密码
+    /**
+     * 数据库密码
+     */
     @Getter
     @Setter
     private String dbPassword;
-    // 默认导出文件输出目录
+    /**
+     * 导出文件输出目录。默认为${user.dir}/export
+     */
     @Getter
     @Setter
-    private String exportDir;
-    // 默认备份文件输出目录
+    private String exportDir = USER_DIR + "/export";
+    /**
+     * 备份文件输出目录。默认为${user.dir}/bak
+     */
     @Getter
     @Setter
-    private String bakDir;
-    // 默认归档文件输出目录
+    private String bakDir = USER_DIR + "/bak";
+    /**
+     * 归档文件输出目录。默认为${user.dir}/archive
+     */
     @Getter
     @Setter
-    private String archiveDir;
-    // 阈值检测脚本路径
+    private String archiveDir = USER_DIR + "/archive";
+    /**
+     * 阈值检测脚本路径
+     */
     @Getter
     @Setter
     private String thresholdScriptPath = "classpath:shell/over_threshold.sh";
-    // 备份脚本路径
+    /**
+     * 备份脚本路径
+     */
     @Getter
     @Setter
     private String bakScriptPath = "classpath:shell/run_bak.sh";
-    // 归档脚本路径
+    /**
+     * 归档脚本路径
+     */
     @Getter
     @Setter
     private String archiveScriptPath = "classpath:shell/run_archive.sh";
-    // 还原脚本路径
+    /**
+     * 还原脚本路径
+     */
     @Getter
     @Setter
     private String restoreScriptPath = "classpath:shell/run_restore.sh";
