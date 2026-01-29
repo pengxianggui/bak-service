@@ -51,4 +51,56 @@
             <version>${hutool.version}</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration>
+                    <from>
+                        <image>ccr.ccs.tencentyun.com/fast-crud/java8-for-bak:latest</image>
+                    </from>
+                    <to>
+                        <image>ccr.ccs.tencentyun.com/fast-crud/bak-server:${project.version}</image>
+                        <tags>
+                            <tag>latest</tag>
+                        </tags>
+<!--                        <auth>-->
+<!--                            <username>${docker.username}</username>-->
+<!--                            <password>${docker.password}</password>-->
+<!--                        </auth>-->
+                    </to>
+                    <allowInsecureRegistries>true</allowInsecureRegistries>
+                    <container>
+                        <workingDirectory>/app</workingDirectory>
+                        <mainClass>io.github.pengxianggui.bak.Application</mainClass>
+                        <creationTime>${maven.build.timestamp}</creationTime>
+                        <environment>
+                            <LANG>zh_CN.UTF-8</LANG>
+                            <TZ>Asia/Shanghai</TZ>
+                        </environment>
+                        <jvmFlags>
+                            <jvmFlag>-Xms128m</jvmFlag>
+                            <jvmFlag>-Xmx512m</jvmFlag>
+                        </jvmFlags>
+                        <ports>
+                            <port>8080</port>
+                        </ports>
+                        <user>root</user>
+                    </container>
+                    <!-- 强制添加 target/classes 以确保 static 被带上 -->
+                    <extraDirectories>
+                        <paths>
+                            <path>
+                                <from>${project.build.outputDirectory}</from>
+                                <into>/app/classes</into>
+                            </path>
+                        </paths>
+                    </extraDirectories>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

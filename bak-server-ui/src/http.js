@@ -2,7 +2,7 @@ import axios from "axios";
 import {ElMessage} from "element-plus";
 
 const http = axios.create({
-    baseURL: import.meta.env.VITE_APP_MODE === 'toBackend' ? '' : '/api',
+    baseURL: import.meta.env.VITE_MODE === 'backend' ? '' : '/api',
 });
 
 http.interceptors.request.use(

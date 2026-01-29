@@ -1,5 +1,6 @@
 package io.github.pengxianggui.bak.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.github.pengxianggui.bak.domain.OprLog;
 import io.github.pengxianggui.bak.mapper.OprLogMapper;
@@ -15,6 +16,9 @@ public class OprLogServiceImpl extends BaseServiceImpl<OprLogMapper, OprLog> imp
 
     @Override
     public String getPreviewUrl(String filePath) {
+        if (StrUtil.isBlank(filePath)) {
+            return filePath;
+        }
         if (filePath.startsWith("http://") || filePath.startsWith("https://")) {
             return filePath;
         }

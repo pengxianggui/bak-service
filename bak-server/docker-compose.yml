@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  bak-server:
+    image: ccr.ccs.tencentyun.com/fast-crud/bak-server:latest
+    container_name: bak-server
+#    restart: always
+    ports:
+      - "8888:8080"  # 宿主机8888 -> 容器8080
+    environment:
+      - FILE_STORE=${FILE_STORE}
+      - ALIYUN_OSS_ENDPOINT=${ALIYUN_OSS_ENDPOINT}
+      - ALIYUN_OSS_KEY_ID=${ALIYUN_OSS_KEY_ID}
+      - ALIYUN_OSS_KEY_SECRET=${ALIYUN_OSS_KEY_SECRET}
+      - ALIYUN_OSS_BUCKET_NAME=${ALIYUN_OSS_BUCKET_NAME}
+      - DB_IP=mysql  # 因为在同一个网络，直接写mysql容器的名字即可
+      - TZ=Asia/Shanghai
+    networks:
+      - my-network
+
+networks:
+  # 声明使用已经存在的外部网络
+  my-network:
+    external: true
