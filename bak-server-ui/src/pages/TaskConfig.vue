@@ -2,8 +2,8 @@
   <div class="task-config">
     <fast-table :option="tableOption">
       <fast-table-column prop="id" label="ID" width="60"/>
-      <fast-table-column prop="categoryId" label="数据类目ID" width="120" hidden/>
-      <fast-table-column-object prop="categoryName" label="类目名" required :filter="0"
+      <fast-table-column prop="categoryId" label="数据类目ID" hidden/>
+      <fast-table-column-object prop="categoryName" label="类目名" required :filter="0" width="180"
                                 :table-option="categoryOption" show-field="name"
                                 :pick-map="{id: 'categoryId', name: 'categoryName'}"/>
       <fast-table-column-select prop="type" label="类型" required width="100"

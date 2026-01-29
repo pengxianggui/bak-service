@@ -12,6 +12,7 @@
 
     <name>bak-server</name>
     <url>http://maven.apache.org</url>
+    <version>0.0.1</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -67,10 +68,6 @@
                         <tags>
                             <tag>latest</tag>
                         </tags>
-<!--                        <auth>-->
-<!--                            <username>${docker.username}</username>-->
-<!--                            <password>${docker.password}</password>-->
-<!--                        </auth>-->
                     </to>
                     <allowInsecureRegistries>true</allowInsecureRegistries>
                     <container>

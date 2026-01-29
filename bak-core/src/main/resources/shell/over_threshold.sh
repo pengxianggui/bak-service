@@ -20,6 +20,7 @@ TIME_FIELD=$7      # 比较的时间字段名
 STRATEGY=$8        # 策略: r-条数比较; d-时间比较
 STRATEGY_VALUE=$9  # 策略对应的参数值
 
+export MYSQL_PWD="${MYSQL_PASSWORD}"
 
 # 查询语句
 if [ $STRATEGY == "d" ]; then
@@ -30,7 +31,7 @@ else
   exit 1
 fi
 
-RESULT=$(mysql -h "$MYSQL_IP" -P "$MYSQL_PORT" -u "$MYSQL_USERNAME" -p"$MYSQL_PASSWORD" -D "$DB_NAME" -se "$QUERY")
+RESULT=$(mysql -h "$MYSQL_IP" -u "$MYSQL_USERNAME" -p"$MYSQL_PASSWORD" -D "$DB_NAME" -se "$QUERY")
 # 判断查询结果并返回布尔值
 if [ "$RESULT" -eq 1 ]; then
     echo "true"
