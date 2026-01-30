@@ -23,7 +23,7 @@ OUTPUT_FILE="$7"
 DELIMITER=',' # csv、txt时列的分割符
 
 
-echo "------脚本入参--------"
+echo "脚本入参"
 echo "p1: $MYSQL_IP"
 echo "p2: $MYSQL_PORT"
 echo "p3: $MYSQL_USERNAME"
@@ -31,7 +31,7 @@ echo "p4: $DB_NAME"
 echo "p5: $TABLE_NAME"
 echo "p6: $WHERE_CONDITION"
 echo "p7: $OUTPUT_FILE"
-echo "------end-----------"
+echo "end"
 
 # 获取文件扩展名
 FILE_EXTENSION="${OUTPUT_FILE##*.}"

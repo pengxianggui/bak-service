@@ -27,7 +27,7 @@ STRATEGY_VALUE="$8"  # 策略对应的参数值
 WHERE_CONDITION="$9" # where条件
 OUTPUT_FILE="${10}"     # 输出文件名, 包含路径
 
-echo "------脚本入参--------"
+echo "【脚本入参】"
 echo "p1: $MYSQL_IP"
 echo "p2: $MYSQL_PORT"
 echo "p3: $MYSQL_USERNAME"
@@ -38,7 +38,7 @@ echo "p7: $STRATEGY"
 echo "p8: $STRATEGY_VALUE"
 echo "p9: $WHERE_CONDITION"
 echo "p10: $OUTPUT_FILE"
-echo "------end-----------"
+echo "【end】"
 
 
 # 如果WHERE_CONDITION为空，则默认赋值"1=1", 避免语法错误
