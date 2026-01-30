@@ -43,16 +43,20 @@ public class DumpManager {
      * @param strategyValue 策略值
      * @return 若达到阈值，则返回true
      */
-    public boolean overThreshold(String dbName,
-                                 String tableName,
-                                 String timeFieldName,
-                                 ArchiveStrategyType strategyType,
-                                 int strategyValue) {
+    public ExecuteResult<Boolean> overThreshold(String dbName,
+                                                String tableName,
+                                                String timeFieldName,
+                                                String whereCondition,
+                                                ArchiveStrategyType strategyType,
+                                                int strategyValue) {
         try {
             File scriptFile = dumpConfig.getThresholdScript();
             if (scriptFile == null || !scriptFile.exists()) {
                 throw new BakException("阈值检测脚本不存在! 请检查dumpConfig配置");
             }
+            WhereCondition condition = new WhereCondition(whereCondition);
+            Assert.isTrue(condition.getConditions().stream().noneMatch(c -> timeFieldName.endsWith(c.getField())),
+                    "自定义where条件( " + whereCondition + ")中应避免再使用归档策略中参考的时间字段:" + timeFieldName);
             Map<String, String> env = new HashMap<>();
             env.put("MYSQL_PWD", dumpConfig.getDbPassword());
             List<String> logs = CommandUtil.executeScript(
@@ -66,10 +70,11 @@ public class DumpManager {
                     tableName,
                     timeFieldName,
                     strategyType.name(),
-                    strategyType.getStrategyValue(strategyValue));
+                    strategyType.getStrategyValue(strategyValue),
+                    condition.toString());
             Assert.isTrue(!logs.isEmpty(), "无法获取阈值检测结果");
             String resultStr = logs.get(logs.size() - 1);
-            return Boolean.parseBoolean(resultStr);
+            return new ExecuteResult<>(Boolean.parseBoolean(resultStr), logs);
         } catch (Exception e) {
             throw new BakException(e, "阈值检测脚本执行失败!");
         }
@@ -158,20 +163,19 @@ public class DumpManager {
                                        String outputDir,
                                        boolean zip) throws IOException, NotOverThresholdException {
         Assert.notBlank(timeFieldName, () -> BakException.archiveEx("归档必须提供时间字段, 请检查对应数据类目配置"));
-
-        DumpExecutor dumpExecutor = dumpConfig.getExecutor(categoryCode);
         WhereCondition condition = new WhereCondition(whereCondition);
         Assert.isTrue(condition.getConditions().stream().noneMatch(c -> timeFieldName.endsWith(c.getField())),
                 "自定义where条件( " + whereCondition + ")中应避免再使用归档策略中参考的时间字段:" + timeFieldName);
         // 阈值检测
-        boolean overThreshold = overThreshold(dbName, tableName, timeFieldName, strategyType, strategyValue);
-        if (!overThreshold) {
-            throw new NotOverThresholdException("数据量未达到归档阈值");
+        ExecuteResult<Boolean> overThresholdDetect = overThreshold(dbName, tableName, timeFieldName, whereCondition, strategyType, strategyValue);
+        if (overThresholdDetect.getResult() != Boolean.TRUE) {
+            throw new NotOverThresholdException("数据量未达到归档阈值", overThresholdDetect.getLogs());
         }
         String outputDirPath = StrUtil.blankToDefault(outputDir, dumpConfig.getArchiveDir())
                 + File.separator + dbName + File.separator + tableName + File.separator
                 + DateUtil.format(new Date(), DatePattern.PURE_DATETIME_PATTERN);
         String outputFileName = tableName + ".sql";
+        DumpExecutor dumpExecutor = dumpConfig.getExecutor(categoryCode);
         return dumpExecutor.archive(
                 dumpConfig.getDbIp(),
                 dumpConfig.getDbPort(),

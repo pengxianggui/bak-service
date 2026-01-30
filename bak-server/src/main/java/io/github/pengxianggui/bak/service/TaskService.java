@@ -84,11 +84,8 @@ public class TaskService {
             oprLog.setExpiredDate(taskConfig.getKeepFate() == null ? null : DateUtil.offsetDay(new Date(), taskConfig.getKeepFate()).toLocalDateTime().toLocalDate());
             return oprLog.getFileUrl();
         } catch (Exception e) {
-            oprLog.setSuccess((e instanceof NotOverThresholdException));
+            oprLog.setSuccess(e instanceof NotOverThresholdException);
             oprLog.setMsg(e.getMessage());
-            if (e instanceof BakException) {
-                oprLog.setMsg(((BakException) e).getLogAsStr());
-            }
             throw e;
         } finally {
             try {
@@ -134,7 +131,7 @@ public class TaskService {
             oprLog.setSuccess(false);
             oprLog.setMsg(e.getMessage());
             if (e instanceof BakException) {
-                oprLog.setMsg(((BakException) e).getLogAsStr());
+                oprLog.setMsg(((BakException) e).getAllMsg());
             }
             throw e;
         } finally {
@@ -178,11 +175,8 @@ public class TaskService {
             oprLog.setExpiredDate(param.getKeepFate() == null ? null : DateUtil.offsetDay(new Date(), param.getKeepFate()).toLocalDateTime().toLocalDate());
             return oprLog.getFileUrl();
         } catch (Exception e) {
-            oprLog.setSuccess((e instanceof NotOverThresholdException));
+            oprLog.setSuccess(e instanceof NotOverThresholdException);
             oprLog.setMsg(e.getMessage());
-            if (e instanceof BakException) {
-                oprLog.setMsg(((BakException) e).getLogAsStr());
-            }
             throw e;
         } finally {
             try {
@@ -216,7 +210,7 @@ public class TaskService {
             newOprLog.setSuccess(Boolean.FALSE);
             newOprLog.setMsg(e.getMessage());
             if (e instanceof BakException) {
-                oprLog.setMsg(((BakException) e).getLogAsStr());
+                oprLog.setMsg(((BakException) e).getAllMsg());
             }
             throw e;
         } finally {
@@ -263,7 +257,7 @@ public class TaskService {
             oprLog.setSuccess(false);
             oprLog.setMsg(e.getMessage());
             if (e instanceof BakException) {
-                oprLog.setMsg(((BakException) e).getLogAsStr());
+                oprLog.setMsg(((BakException) e).getAllMsg());
             }
             throw e;
         } finally {

@@ -44,7 +44,7 @@ public class BakException extends RuntimeException {
 
     public BakException(Exception e, String messageTmpl, Object... args) {
         super(StrUtil.format(messageTmpl, args), e);
-        this.shellLogs = Collections.emptyList();
+        this.shellLogs = (e instanceof BakException) ? ((BakException) e).shellLogs : Collections.emptyList();
     }
 
     public BakException oprType(OprType oprType) {
@@ -52,11 +52,18 @@ public class BakException extends RuntimeException {
         return this;
     }
 
-    public String getLogAsStr() {
+    @Override
+    public String getMessage() {
+        return getAllMsg();
+    }
+
+    public String getAllMsg() {
+        String message = super.getMessage();
+        String shellLogStr = "";
         if (shellLogs != null) {
-            return String.join("\n", shellLogs);
+            shellLogStr = String.join("\n", shellLogs);
         }
-        return "";
+        return message + "\n\n" + shellLogStr;
     }
 
 }
