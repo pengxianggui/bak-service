@@ -1,5 +1,6 @@
 package io.github.pengxianggui.bak.controller;
 
+import io.github.pengxianggui.bak.NotOverThresholdException;
 import io.github.pengxianggui.bak.controller.dto.ArchiveParam;
 import io.github.pengxianggui.bak.controller.dto.BakParam;
 import io.github.pengxianggui.bak.controller.vo.Result;
@@ -40,6 +41,9 @@ public class TaskController {
         try {
             String fileUrl = taskService.run(taskConfigId);
             return Result.success(fileUrl, "任务执行成功, 文件已经生成");
+        } catch (NotOverThresholdException e) {
+            log.warn(e.getMessage());
+            return Result.warning(null, e.getMessage());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return Result.fail(500, e.getMessage());

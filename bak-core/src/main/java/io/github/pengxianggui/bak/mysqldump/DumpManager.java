@@ -166,7 +166,7 @@ public class DumpManager {
         // 阈值检测
         boolean overThreshold = overThreshold(dbName, tableName, timeFieldName, strategyType, strategyValue);
         if (!overThreshold) {
-            throw new NotOverThresholdException("数据量未达到归档阈值,不执行归档操作");
+            throw new NotOverThresholdException("数据量未达到归档阈值");
         }
         String outputDirPath = StrUtil.blankToDefault(outputDir, dumpConfig.getArchiveDir())
                 + File.separator + dbName + File.separator + tableName + File.separator

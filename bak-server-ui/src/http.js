@@ -16,11 +16,12 @@ http.interceptors.request.use(
 http.interceptors.response.use(
     (response) => {
         // 如果后端有自定义响应体, 则返回内层的业务数据
-        const {code, data, msg} = response.data
+        const {code, data, msg, msgType} = response.data
         if (code === 0) {
             return data;
         }
-        ElMessage.error(msg)
+        msgType === 'WARNING' ? ElMessage.warning(msg) : ElMessage.error(msg)
+        return Promise.reject()
     },
     (error) => {
         ElMessage.error('系统错误')
