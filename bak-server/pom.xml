@@ -12,7 +12,7 @@
 
     <name>bak-server</name>
     <url>http://maven.apache.org</url>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

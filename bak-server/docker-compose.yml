@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   bak-server:
-    image: ccr.ccs.tencentyun.com/fast-crud/bak-server:0.0.3
+    image: ccr.ccs.tencentyun.com/fast-crud/bak-server:0.0.4
     container_name: bak-server
     #    restart: always
     ports:
