@@ -22,7 +22,7 @@ public enum ArchiveStrategyType {
             case r:
                 return String.valueOf(strategyValue);
             default:
-                throw BakException.archiveEx("策略值异常: %s", this.name());
+                throw BakException.archiveEx("策略值异常: {}", this.name());
         }
     }
 }

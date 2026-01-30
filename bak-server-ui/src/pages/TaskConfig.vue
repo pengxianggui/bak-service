@@ -29,10 +29,9 @@
           <el-button link type="primary" size="small" @click="runOnce(scope)">运行一次</el-button>
         </template>
       </el-table-column>
-      <!-- 考虑归档操作过于高危，因此先注释手动输入，控制执行的表只能从【数据类目】中定义 -->
-<!--      <template #button="scope">-->
-<!--        <el-button :size="scope.size" type="primary" plain @click="inputRun">输入执行</el-button>-->
-<!--      </template>-->
+      <template #button="scope">
+        <el-button :size="scope.size" type="primary" plain @click="inputRun">输入执行</el-button>
+      </template>
     </fast-table>
   </div>
 </template>
@@ -86,7 +85,7 @@ export default {
     inputRun() {
       util.openDialog({
         component: BakArchiveParamForm, dialogProps: {
-          title: '手动输入参数执行备份/归档',
+          title: '输入参数执行一次备份',
           width: '50%'
         }
       }).then((data) => {

@@ -11,7 +11,7 @@
       </el-menu-item>
       <el-menu-item index="/opr-log">
         <i class="el-icon-setting"></i>
-        <span slot="title">操作记录</span>
+        <span slot="title">执行记录</span>
       </el-menu-item>
     </el-menu>
     <router-view class="router-view"></router-view>

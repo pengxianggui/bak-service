@@ -4,6 +4,8 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import io.github.pengxianggui.bak.ArchiveStrategyType;
+import io.github.pengxianggui.bak.BakException;
+import io.github.pengxianggui.bak.NotOverThresholdException;
 import io.github.pengxianggui.bak.UserContext;
 import io.github.pengxianggui.bak.controller.dto.ArchiveParam;
 import io.github.pengxianggui.bak.controller.dto.BakParam;
@@ -42,7 +44,7 @@ public class TaskService {
     @Autowired
     private FileManager fileManager;
 
-    public String run(Long id) throws IOException {
+    public String run(Long id) throws IOException, NotOverThresholdException {
         log.info("Task begin to run, taskId:{}", id);
         TaskConfig taskConfig = taskConfigService.getById(id);
         Assert.notNull(taskConfig, "任务配置不存在!");
@@ -82,8 +84,11 @@ public class TaskService {
             oprLog.setExpiredDate(taskConfig.getKeepFate() == null ? null : DateUtil.offsetDay(new Date(), taskConfig.getKeepFate()).toLocalDateTime().toLocalDate());
             return oprLog.getFileUrl();
         } catch (Exception e) {
-            oprLog.setSuccess(Boolean.FALSE);
+            oprLog.setSuccess((e instanceof NotOverThresholdException));
             oprLog.setMsg(e.getMessage());
+            if (e instanceof BakException) {
+                oprLog.setMsg(((BakException) e).getLogAsStr());
+            }
             throw e;
         } finally {
             try {
@@ -128,6 +133,9 @@ public class TaskService {
         } catch (Exception e) {
             oprLog.setSuccess(false);
             oprLog.setMsg(e.getMessage());
+            if (e instanceof BakException) {
+                oprLog.setMsg(((BakException) e).getLogAsStr());
+            }
             throw e;
         } finally {
             try {
@@ -138,7 +146,7 @@ public class TaskService {
         }
     }
 
-    public String archive(@Valid ArchiveParam param) throws IOException {
+    public String archive(@Valid ArchiveParam param) throws IOException, NotOverThresholdException {
         OprLog oprLog = new OprLog();
         String categoryCode = param.getCategoryCode();
         String categoryName = null;
@@ -170,8 +178,11 @@ public class TaskService {
             oprLog.setExpiredDate(param.getKeepFate() == null ? null : DateUtil.offsetDay(new Date(), param.getKeepFate()).toLocalDateTime().toLocalDate());
             return oprLog.getFileUrl();
         } catch (Exception e) {
-            oprLog.setSuccess(Boolean.FALSE);
+            oprLog.setSuccess((e instanceof NotOverThresholdException));
             oprLog.setMsg(e.getMessage());
+            if (e instanceof BakException) {
+                oprLog.setMsg(((BakException) e).getLogAsStr());
+            }
             throw e;
         } finally {
             try {
@@ -204,6 +215,9 @@ public class TaskService {
         } catch (Exception e) {
             newOprLog.setSuccess(Boolean.FALSE);
             newOprLog.setMsg(e.getMessage());
+            if (e instanceof BakException) {
+                oprLog.setMsg(((BakException) e).getLogAsStr());
+            }
             throw e;
         } finally {
             try {
@@ -248,6 +262,9 @@ public class TaskService {
         } catch (Exception e) {
             oprLog.setSuccess(false);
             oprLog.setMsg(e.getMessage());
+            if (e instanceof BakException) {
+                oprLog.setMsg(((BakException) e).getLogAsStr());
+            }
             throw e;
         } finally {
             try {

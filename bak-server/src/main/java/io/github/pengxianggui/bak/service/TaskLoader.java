@@ -2,6 +2,7 @@ package io.github.pengxianggui.bak.service;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import io.github.pengxianggui.bak.NotOverThresholdException;
 import io.github.pengxianggui.bak.TaskManager;
 import io.github.pengxianggui.bak.domain.TaskConfig;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +42,8 @@ public class TaskLoader {
             taskManager.start(String.valueOf(config.getId()), config.getCron(), () -> {
                 try {
                     taskService.run(config.getId());
+                } catch (NotOverThresholdException e) {
+                    log.warn("任务未执行: {}", e.getMessage());
                 } catch (Exception e) {
                     log.error("任务执行失败", e);
                 }

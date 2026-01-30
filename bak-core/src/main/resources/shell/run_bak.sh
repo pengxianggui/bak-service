@@ -5,22 +5,33 @@ export LC_ALL=zh_CN.UTF-8
 
 # mysql备份脚本，支持连接单个指定数据库表、支持配置where条件，支持指定导出文件的输出路径，包含后缀名(仅支持的后缀名为: sql、txt、csv)
 # 脚本若执行成功, 最后将输出备份文件的路径
+# 注意: 为安全，只支持调用此脚本时预先设置环境变量MYSQL_PWD，不接受传入
 
 # 检查参数数量
-if [ "$#" -ne 8 ]; then
-    echo "Usage: $0 <mysql_ip> <mysql_port> <mysql_username> <mysql_password> <db_name> <table_name> <where_condition> <output_file>"
+if [ "$#" -ne 7 ]; then
+    echo "Usage: $0 <mysql_ip> <mysql_port> <mysql_username> <db_name> <table_name> <where_condition> <output_file>"
     exit 1
 fi
 
 MYSQL_IP=$1
 MYSQL_PORT=$2
 MYSQL_USERNAME=$3
-MYSQL_PASSWORD=$4
-DB_NAME=$5
-TABLE_NAME=$6
-WHERE_CONDITION=$7
-OUTPUT_FILE=$8
+DB_NAME=$4
+TABLE_NAME=$5
+WHERE_CONDITION="$6"
+OUTPUT_FILE="$7"
 DELIMITER=',' # csv、txt时列的分割符
+
+
+echo "------脚本入参--------"
+echo "p1: $MYSQL_IP"
+echo "p2: $MYSQL_PORT"
+echo "p3: $MYSQL_USERNAME"
+echo "p4: $DB_NAME"
+echo "p5: $TABLE_NAME"
+echo "p6: $WHERE_CONDITION"
+echo "p7: $OUTPUT_FILE"
+echo "------end-----------"
 
 # 获取文件扩展名
 FILE_EXTENSION="${OUTPUT_FILE##*.}"
@@ -39,14 +50,13 @@ fi
 if [ "$FILE_EXTENSION" = "sql" ]; then
   # 将delete语句写入开头, 以便还原
   echo "DELETE FROM \`${DB_NAME}\`.\`$TABLE_NAME\` WHERE $WHERE_CONDITION;" >> $OUTPUT_FILE
-  MYSQL_PWD="${MYSQL_PASSWORD}" mysqldump -h $MYSQL_IP -P $MYSQL_PORT -u "$MYSQL_USERNAME" --single-transaction --quick --no-create-info "$DB_NAME" "$TABLE_NAME" --where="$WHERE_CONDITION"  --default-character-set=utf8 >> $OUTPUT_FILE
-
+  mysqldump -h $MYSQL_IP -P $MYSQL_PORT -u "$MYSQL_USERNAME" --single-transaction --quick --no-create-info "$DB_NAME" "$TABLE_NAME" --where="$WHERE_CONDITION"  --default-character-set=utf8 >> $OUTPUT_FILE
 else
   # 如果是其它，则使用mysql配合sed等命令，以便输出csv、txt时保持正确、可读的格式。
   # 获取表结构，确定哪些字段是 BIT 类型, 进行转换；同时如果类型为字符类型，则给结果加上引号避免含有英文逗号导致csv格式错误
   SELECT_COLUMNS=""
   COLUMN_TITLE="" # 表头
-  COLUMN_INFO=$(MYSQL_PWD="${MYSQL_PASSWORD}" mysql -h $MYSQL_IP -P $MYSQL_PORT -u "$MYSQL_USERNAME" -D "$DB_NAME" -e "SHOW FULL COLUMNS FROM \`$TABLE_NAME\`;" --default-character-set=utf8 | tail -n +2)
+  COLUMN_INFO=$(mysql -h $MYSQL_IP -P $MYSQL_PORT -u "$MYSQL_USERNAME" -D "$DB_NAME" -e "SHOW FULL COLUMNS FROM \`$TABLE_NAME\`;" --default-character-set=utf8 | tail -n +2)
   BIT_COLUMNS=($(echo "$COLUMN_INFO" | awk '{if ($2 == "bit(1)") print $1}'))
   while IFS= read -r line; do
       COLUMN=$(echo "$line" | awk '{print $1}')
@@ -71,20 +81,20 @@ else
           # 写入表头
           echo "$COLUMN_TITLE" > $OUTPUT_FILE
           # 导出为 TXT 文件，使用制表符分隔
-          MYSQL_PWD="${MYSQL_PASSWORD}" mysql -h $MYSQL_IP -P $MYSQL_PORT -u "$MYSQL_USERNAME" -e "SELECT $SELECT_COLUMNS FROM \`$DB_NAME\`.\`$TABLE_NAME\` WHERE $WHERE_CONDITION;"  --default-character-set=utf8 | sed '1d' | tr '\t' $DELIMITER >> $OUTPUT_FILE
+          mysql -h $MYSQL_IP -P $MYSQL_PORT -u "$MYSQL_USERNAME" -e "SELECT $SELECT_COLUMNS FROM \`$DB_NAME\`.\`$TABLE_NAME\` WHERE $WHERE_CONDITION;"  --default-character-set=utf8 | sed '1d' | tr '\t' $DELIMITER >> $OUTPUT_FILE
           ;;
       csv)
           # 写入表头
           echo "$COLUMN_TITLE" > $OUTPUT_FILE
           # 导出为 CSV 文件，使用逗号分隔
-          MYSQL_PWD="${MYSQL_PASSWORD}" mysql -h $MYSQL_IP -P $MYSQL_PORT -u "$MYSQL_USERNAME" -e "SELECT $SELECT_COLUMNS FROM \`$DB_NAME\`.\`$TABLE_NAME\` WHERE $WHERE_CONDITION;"  --default-character-set=utf8 | sed '1d' | tr '\t' $DELIMITER >> $OUTPUT_FILE
+          mysql -h $MYSQL_IP -P $MYSQL_PORT -u "$MYSQL_USERNAME" -e "SELECT $SELECT_COLUMNS FROM \`$DB_NAME\`.\`$TABLE_NAME\` WHERE $WHERE_CONDITION;"  --default-character-set=utf8 | sed '1d' | tr '\t' $DELIMITER >> $OUTPUT_FILE
           ;;
       xlsx)
           # 导出为 xlsx 文件: 先导出为csv, 再使用libreoffice转为xlsx
           TEMP_CSV_FILE="${OUTPUT_FILE%.*}.csv"
           # 写入表头
           echo "$COLUMN_TITLE" > $TEMP_CSV_FILE
-          MYSQL_PWD="${MYSQL_PASSWORD}" mysql -h $MYSQL_IP -P $MYSQL_PORT -u "$MYSQL_USERNAME" -e "SELECT $SELECT_COLUMNS FROM \`$DB_NAME\`.\`$TABLE_NAME\` WHERE $WHERE_CONDITION;"  --default-character-set=utf8 | sed '1d' | tr '\t' $DELIMITER >> $TEMP_CSV_FILE
+          mysql -h $MYSQL_IP -P $MYSQL_PORT -u "$MYSQL_USERNAME" -e "SELECT $SELECT_COLUMNS FROM \`$DB_NAME\`.\`$TABLE_NAME\` WHERE $WHERE_CONDITION;"  --default-character-set=utf8 | sed '1d' | tr '\t' $DELIMITER >> $TEMP_CSV_FILE
           soffice --headless --convert-to xlsx --infilter="CSV:44,34,76,1" $TEMP_CSV_FILE --outdir "$(dirname "$OUTPUT_FILE")"
           if [[ -e "$OUTPUT_FILE" ]]; then
               echo "${OUTPUT_FILE}已生成, 删除临时文件$TEMP_CSV_FILE"

@@ -28,15 +28,17 @@ public class CommandUtil {
     /**
      * 执行脚本，并返回执行过程的日志
      *
-     * @param args
+     * @param env  环境变量参数
+     * @param args 脚本执行参数，首个应当是bash或sh命令
      * @return 脚本执行日志
      * @throws IOException
      */
-    public static List<String> executeScript(String... args) throws IOException {
+    public static List<String> executeScript(Map<String, String> env, String... args) throws IOException {
         List<String> logs = new ArrayList<>();
-        args = escapeArgs(args);
+//        args = escapeArgs(args);
         // 构建ProcessBuilder
         ProcessBuilder processBuilder = inheritEnv(new ProcessBuilder(args), false);
+        processBuilder.environment().putAll(env);
         processBuilder.redirectErrorStream(true);  // 将 stderr 合并到 stdout
         // 执行脚本
         Process process = processBuilder.start();
@@ -44,7 +46,7 @@ public class CommandUtil {
         BufferedReader stdOutput = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
         String line;
         while ((line = stdOutput.readLine()) != null) {
-            log.debug(line);
+            log.info(line);
             logs.add(line);
         }
         int exitCode;
@@ -54,7 +56,7 @@ public class CommandUtil {
             throw new RuntimeException(e);
         }
         String finalResult = logs.isEmpty() ? "" : logs.get(logs.size() - 1);
-        Assert.isTrue(exitCode == 0, () -> new BakException("脚本执行失败，退出码: %d, msg: %s", exitCode, finalResult));
+        Assert.isTrue(exitCode == 0, () -> new BakException(logs, "脚本执行失败，退出码: {}, msg: {}", exitCode, finalResult));
         return logs;
     }
 

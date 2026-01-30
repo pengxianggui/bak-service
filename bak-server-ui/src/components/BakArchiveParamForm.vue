@@ -1,24 +1,25 @@
 <template>
   <el-form :model="formData" ref="form" label-position="top">
     <el-row :gutter="20">
-      <el-col :span="12">
-        <el-form-item prop="type" label="类型" required>
-          <el-select v-model="formData.type">
-            <el-option label="备份" value="bak"></el-option>
-            <el-option label="归档" value="archive"></el-option>
-          </el-select>
-        </el-form-item>
-      </el-col>
-      <el-col :span="12">
-        <el-form-item prop="categoryCode" label="选择数据类目">
-          <fast-object-picker v-model="formData.categoryCode"
-                              :table-option="categoryOption"
-                              :pick-object="formData"
-                              :pick-map="{dbName: 'dbName', tableName: 'tableName', timeFieldName: 'timeFieldName'}"
-                              show-field="code"
-                              :multiple="false"></fast-object-picker>
-        </el-form-item>
-      </el-col>
+      <!-- 考虑到归档操作涉及数据删除,是比较敏感的, 限定入口只有已建的任务 -->
+<!--      <el-col :span="12">-->
+<!--        <el-form-item prop="type" label="类型" required>-->
+<!--          <el-select v-model="formData.type">-->
+<!--            <el-option label="备份" value="bak"></el-option>-->
+<!--            <el-option label="归档" value="archive"></el-option>-->
+<!--          </el-select>-->
+<!--        </el-form-item>-->
+<!--      </el-col>-->
+<!--      <el-col :span="12">-->
+<!--        <el-form-item prop="categoryCode" label="选择数据类目">-->
+<!--          <fast-object-picker v-model="formData.categoryCode"-->
+<!--                              :table-option="categoryOption"-->
+<!--                              :pick-object="formData"-->
+<!--                              :pick-map="{dbName: 'dbName', tableName: 'tableName', timeFieldName: 'timeFieldName'}"-->
+<!--                              show-field="code"-->
+<!--                              :multiple="false"></fast-object-picker>-->
+<!--        </el-form-item>-->
+<!--      </el-col>-->
     </el-row>
     <el-row :gutter="20" v-if="!categoryCode">
       <el-col :span="12">
@@ -70,7 +71,7 @@
     <el-form-item>
       <div style="display: flex; justify-content: space-between">
         <span style="flex: 1"></span>
-        <el-button type="primary" @click="execute">执行</el-button>
+        <el-button type="primary" @click="execute">执行{{ formData.type === 'bak' ? '备份' : (formData.type === 'archive' ? '归档' : '')}}</el-button>
         <el-button @click="cancel">取消</el-button>
       </div>
     </el-form-item>

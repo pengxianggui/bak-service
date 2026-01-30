@@ -31,7 +31,7 @@ public class WhereCondition {
         try {
             return SqlUtil.parseWhereCondition(value);
         } catch (JSQLParserException e) {
-            throw new BakException("where条件解析失败", e);
+            throw new BakException(e, "where条件解析失败:{}", value);
         }
     }
 

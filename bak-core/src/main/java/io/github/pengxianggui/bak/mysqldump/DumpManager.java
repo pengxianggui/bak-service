@@ -6,6 +6,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import io.github.pengxianggui.bak.ArchiveStrategyType;
 import io.github.pengxianggui.bak.BakException;
+import io.github.pengxianggui.bak.NotOverThresholdException;
 import io.github.pengxianggui.bak.util.CommandUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,7 +16,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * dump操作核心类
@@ -47,16 +50,18 @@ public class DumpManager {
                                  int strategyValue) {
         try {
             File scriptFile = dumpConfig.getThresholdScript();
-            if (scriptFile == null || scriptFile.exists()) {
+            if (scriptFile == null || !scriptFile.exists()) {
                 throw new BakException("阈值检测脚本不存在! 请检查dumpConfig配置");
             }
+            Map<String, String> env = new HashMap<>();
+            env.put("MYSQL_PWD", dumpConfig.getDbPassword());
             List<String> logs = CommandUtil.executeScript(
+                    env,
                     CommandUtil.getBashCommand(),
                     scriptFile.getAbsolutePath(),
                     dumpConfig.getDbIp(),
                     dumpConfig.getDbPortAsStr(),
                     dumpConfig.getDbUsername(),
-                    dumpConfig.getDbPassword(),
                     dbName,
                     tableName,
                     timeFieldName,
@@ -66,7 +71,7 @@ public class DumpManager {
             String resultStr = logs.get(logs.size() - 1);
             return Boolean.parseBoolean(resultStr);
         } catch (Exception e) {
-            throw new BakException("阈值检测脚本执行失败!", e);
+            throw new BakException(e, "阈值检测脚本执行失败!");
         }
     }
 
@@ -151,13 +156,18 @@ public class DumpManager {
                                        ArchiveStrategyType strategyType,
                                        Integer strategyValue,
                                        String outputDir,
-                                       boolean zip) throws IOException {
+                                       boolean zip) throws IOException, NotOverThresholdException {
         Assert.notBlank(timeFieldName, () -> BakException.archiveEx("归档必须提供时间字段, 请检查对应数据类目配置"));
 
         DumpExecutor dumpExecutor = dumpConfig.getExecutor(categoryCode);
         WhereCondition condition = new WhereCondition(whereCondition);
         Assert.isTrue(condition.getConditions().stream().noneMatch(c -> timeFieldName.endsWith(c.getField())),
                 "自定义where条件( " + whereCondition + ")中应避免再使用归档策略中参考的时间字段:" + timeFieldName);
+        // 阈值检测
+        boolean overThreshold = overThreshold(dbName, tableName, timeFieldName, strategyType, strategyValue);
+        if (!overThreshold) {
+            throw new NotOverThresholdException("数据量未达到归档阈值,不执行归档操作");
+        }
         String outputDirPath = StrUtil.blankToDefault(outputDir, dumpConfig.getArchiveDir())
                 + File.separator + dbName + File.separator + tableName + File.separator
                 + DateUtil.format(new Date(), DatePattern.PURE_DATETIME_PATTERN);

@@ -1,6 +1,7 @@
 package io.github.pengxianggui.bak.service.impl;
 
 import cn.hutool.core.lang.Assert;
+import io.github.pengxianggui.bak.NotOverThresholdException;
 import io.github.pengxianggui.bak.TaskManager;
 import io.github.pengxianggui.bak.domain.TaskConfig;
 import io.github.pengxianggui.bak.mapper.TaskConfigMapper;
@@ -46,7 +47,9 @@ public class TaskConfigServiceImpl extends BaseServiceImpl<TaskConfigMapper, Tas
             taskManager.start(String.valueOf(entity.getId()), entity.getCron(), () -> {
                 try {
                     taskService.run(entity.getId());
-                } catch (IOException e) {
+                } catch (NotOverThresholdException e) {
+                    log.warn("任务未执行: {}", e.getMessage());
+                } catch (Exception e) {
                     log.error("任务执行失败", e);
                 }
             });

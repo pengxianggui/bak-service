@@ -12,7 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -61,7 +63,7 @@ public abstract class DumpExecutor {
         Assert.notBlank(outputFileName, () -> BakException.exportEx("输出文件名不能为空"));
         final String regex = ".*\\.(txt|csv|sql|xlsx)$";
         Assert.isTrue(Pattern.matches(regex, outputFileName),
-                () -> BakException.exportEx("不支持的文件后缀: %s, 只支持导出txt|csv|sql|xlsx", outputFileName));
+                () -> BakException.exportEx("不支持的文件后缀: {}, 只支持导出txt|csv|sql|xlsx", outputFileName));
 
         File scriptFile = dumpConfig.getBakScript();
         if (scriptFile == null || !scriptFile.exists()) {
@@ -70,15 +72,17 @@ public abstract class DumpExecutor {
 
         File dir = new File(outputDirPath);
         if (!dir.exists()) {
-            Assert.isTrue(dir.mkdirs(), () -> new BakException("无法创建目录:%s", dir.getAbsolutePath()));
+            Assert.isTrue(dir.mkdirs(), () -> new BakException("无法创建目录:{}", dir.getAbsolutePath()));
         }
         String outputFilePath = outputDirPath + File.separator + outputFileName;
-        List<String> logs = CommandUtil.executeScript(CommandUtil.getBashCommand(), scriptFile.getAbsolutePath(),
-                dbIp, String.valueOf(dbPort), dbUsername, dbPassword, dbName, tableName, condition.toString(), outputFilePath);
+        Map<String, String> env = new HashMap<>();
+        env.put("MYSQL_PWD", dbPassword);
+        List<String> logs = CommandUtil.executeScript(env, CommandUtil.getBashCommand(), scriptFile.getAbsolutePath(),
+                dbIp, String.valueOf(dbPort), dbUsername, dbName, tableName, condition.toString(), outputFilePath);
 
         File file = new File(outputFilePath);
         if (!file.exists()) {
-            throw BakException.exportEx("导出的文件(%s)不存在!", outputFilePath);
+            throw BakException.exportEx("导出的文件({})不存在!", outputFilePath);
         }
 
         return new ExecuteResult<>(zip ? zipify(file) : file, logs);
@@ -100,7 +104,7 @@ public abstract class DumpExecutor {
      */
     ExecuteResult<File> bak(String dbIp, int dbPort, String dbUsername, String dbPassword, String dbName, String tableName,
                             WhereCondition condition, String outputDirPath, String outputFileName, boolean zip) throws IOException {
-        Assert.isTrue(outputFileName.endsWith(".sql"), () -> BakException.bakEx("备份文件格式不正确: %s, 只支持.sql", outputFileName));
+        Assert.isTrue(outputFileName.endsWith(".sql"), () -> BakException.bakEx("备份文件格式不正确: {}, 只支持.sql", outputFileName));
         return export(dbIp, dbPort, dbUsername, dbPassword, dbName, tableName, condition, outputDirPath, outputFileName, zip);
     }
 
@@ -116,10 +120,10 @@ public abstract class DumpExecutor {
      */
     ExecuteResult<Boolean> restore(String dbIp, int dbPort, String dbUsername, String dbPassword, String dbName,
                                    File bakFile) throws IOException {
-        Assert.isTrue(bakFile.exists(), () -> BakException.restoreEx("备份文件不存在: %s", bakFile.getAbsolutePath()));
+        Assert.isTrue(bakFile.exists(), () -> BakException.restoreEx("备份文件不存在: {}", bakFile.getAbsolutePath()));
         String bakFilePath = FileUtil.getName(bakFile);
         Assert.isTrue(bakFilePath.endsWith(".zip") || bakFilePath.endsWith(".sql"),
-                () -> BakException.restoreEx("备份文件格式不正确: %s, 只能针对.zip或.sql执行还原", bakFile.getAbsolutePath()));
+                () -> BakException.restoreEx("备份文件格式不正确: {}, 只能针对.zip或.sql执行还原", bakFile.getAbsolutePath()));
 
         File scriptFile = dumpConfig.getRestoreScript();
         if (scriptFile == null || !scriptFile.exists()) {
@@ -130,10 +134,10 @@ public abstract class DumpExecutor {
         if (bakFilePath.endsWith(".zip")) {
             // 解压
             List<File> files = FileUtils.unzip(bakFile);
-            Assert.isTrue(!files.isEmpty(), () -> BakException.restoreEx("zip文件解压后没有内容!请检查备份文件: %s", bakFilePath));
+            Assert.isTrue(!files.isEmpty(), () -> BakException.restoreEx("zip文件解压后没有内容!请检查备份文件: {}", bakFilePath));
             for (File f : files) {
-                Assert.isTrue(f.exists(), () -> BakException.restoreEx("无法执行还原！备份文件可能被删了: %s", f.getAbsolutePath()));
-                Assert.isTrue(f.getAbsolutePath().endsWith(".sql"), () -> BakException.restoreEx("无法执行还原！备份文件不是sql文件: %s", f.getAbsolutePath()));
+                Assert.isTrue(f.exists(), () -> BakException.restoreEx("无法执行还原！备份文件可能被删了: {}", f.getAbsolutePath()));
+                Assert.isTrue(f.getAbsolutePath().endsWith(".sql"), () -> BakException.restoreEx("无法执行还原！备份文件不是sql文件: {}", f.getAbsolutePath()));
             }
             executeFiles.addAll(files);
         } else {
@@ -141,9 +145,11 @@ public abstract class DumpExecutor {
         }
 
         List<String> logs = new ArrayList<>();
+        Map<String, String> env = new HashMap<>();
+        env.put("MYSQL_PWD", dbPassword);
         for (File file : executeFiles) {
-            List<String> log = CommandUtil.executeScript(CommandUtil.getBashCommand(), scriptFile.getAbsolutePath(), dbIp, String.valueOf(dbPort),
-                    dbUsername, dbPassword, dbName, file.getAbsolutePath());
+            List<String> log = CommandUtil.executeScript(env, CommandUtil.getBashCommand(), scriptFile.getAbsolutePath(), dbIp, String.valueOf(dbPort),
+                    dbUsername, dbName, file.getAbsolutePath());
             logs.addAll(log);
         }
         return new ExecuteResult<>(true, logs);
@@ -174,16 +180,18 @@ public abstract class DumpExecutor {
 
         File dir = new File(outputDirPath);
         if (!dir.exists()) {
-            Assert.isTrue(dir.mkdirs(), () -> BakException.archiveEx("无法创建目录:%s", dir.getAbsolutePath()));
+            Assert.isTrue(dir.mkdirs(), () -> BakException.archiveEx("无法创建目录:{}", dir.getAbsolutePath()));
         }
 
+        Map<String, String> env = new HashMap<>();
+        env.put("MYSQL_PWD", dbPassword);
         String outputFilePath = outputDirPath + File.separator + outputFileName;
-        List<String> logs = CommandUtil.executeScript(CommandUtil.getBashCommand(), scriptFile.getAbsolutePath(), dbIp, String.valueOf(dbPort), dbUsername, dbPassword,
+        List<String> logs = CommandUtil.executeScript(env, CommandUtil.getBashCommand(), scriptFile.getAbsolutePath(), dbIp, String.valueOf(dbPort), dbUsername,
                 dbName, tableName, timeFieldName, strategy.name(), strategy.getStrategyValue(strategyValue), condition.toString(), outputFilePath);
 
         File file = new File(outputFilePath);
         if (!file.exists()) {
-            throw BakException.archiveEx("归档文件(%s)不存在!", outputFilePath);
+            throw BakException.archiveEx("归档文件({})不存在!", outputFilePath);
         }
         return new ExecuteResult<>(zip ? zipify(file) : file, logs);
     }

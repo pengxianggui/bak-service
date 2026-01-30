@@ -2,18 +2,28 @@ version: '3.8'
 
 services:
   bak-server:
-    image: ccr.ccs.tencentyun.com/fast-crud/bak-server:latest
+    image: ccr.ccs.tencentyun.com/fast-crud/bak-server:0.0.3
     container_name: bak-server
-#    restart: always
+    #    restart: always
     ports:
       - "8888:8080"  # 宿主机8888 -> 容器8080
     environment:
+      - DB_IP=${DB_IP}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
       - FILE_STORE=${FILE_STORE}
+      #      - EXPORT_DIR=${EXPORT_DIR}
+      #      - BAK_DIR=${BAK_DIR}
+      #      - ARCHIVE_DIR=${ARCHIVE_DIR}
+      #      - THRESHOLD_SCRIPT_PATH=${THRESHOLD_SCRIPT_PATH}
+      #      - BAK_SCRIPT_PATH=${BAK_SCRIPT_PATH}
+      #      - ARCHIVE_SCRIPT_PATH=${ARCHIVE_SCRIPT_PATH}
+      #      - RESTORE_SCRIPT_PATH=${RESTORE_SCRIPT_PATH}
       - ALIYUN_OSS_ENDPOINT=${ALIYUN_OSS_ENDPOINT}
       - ALIYUN_OSS_KEY_ID=${ALIYUN_OSS_KEY_ID}
       - ALIYUN_OSS_KEY_SECRET=${ALIYUN_OSS_KEY_SECRET}
       - ALIYUN_OSS_BUCKET_NAME=${ALIYUN_OSS_BUCKET_NAME}
-      - DB_IP=mysql  # 因为在同一个网络，直接写mysql容器的名字即可
       - TZ=Asia/Shanghai
     networks:
       - my-network

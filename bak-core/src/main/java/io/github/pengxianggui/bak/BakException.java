@@ -1,7 +1,11 @@
 package io.github.pengxianggui.bak;
 
+import cn.hutool.core.util.StrUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author pengxg
@@ -11,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 public class BakException extends RuntimeException {
     @Getter
     private OprType oprType;
+    private final List<String> shellLogs;
 
     public static BakException bakEx(String messageTmpl, Object... args) {
         return new BakException(messageTmpl, args).oprType(OprType.bak);
@@ -29,15 +34,17 @@ public class BakException extends RuntimeException {
     }
 
     public BakException(String messageTmpl, Object... args) {
-        super(String.format(messageTmpl, args));
+        this(Collections.emptyList(), messageTmpl, args);
     }
 
-    public BakException(Throwable cause) {
-        super(cause);
+    public BakException(List<String> shellLogs, String messageTmpl, Object... args) {
+        super(StrUtil.format(messageTmpl, args));
+        this.shellLogs = shellLogs;
     }
 
-    public BakException(Throwable cause, String messageTmpl, Object... args) {
-        super(String.format(messageTmpl, args), cause);
+    public BakException(Exception e, String messageTmpl, Object... args) {
+        super(StrUtil.format(messageTmpl, args), e);
+        this.shellLogs = Collections.emptyList();
     }
 
     public BakException oprType(OprType oprType) {
@@ -45,12 +52,11 @@ public class BakException extends RuntimeException {
         return this;
     }
 
-    private static String format(String messageTmpl, Object... args) {
-        try {
-            return String.format(messageTmpl, args);
-        } catch (Exception e) {
-            log.warn("模板参数配置有误, msg:{}", e.getMessage());
-            return messageTmpl;
+    public String getLogAsStr() {
+        if (shellLogs != null) {
+            return String.join("\n", shellLogs);
         }
+        return "";
     }
+
 }

@@ -12,7 +12,7 @@
     "axios": "^1.7.9",
     "core-js": "^3.8.3",
     "element-plus": "^2.3.12",
-    "fast-crud-ui3": "^1.5.19",
+    "fast-crud-ui3": "^1.5.20",
     "vue": "^3.4.0",
     "vue-router": "^4.1.6"
   },
